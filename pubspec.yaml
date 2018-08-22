@@ -1,6 +1,6 @@
 name: flutter_socket_io
 description: Flutter Socket IO Plugin
-version: 0.0.21
+version: 0.0.22
 author: ClickApp <ClickTeam@itsclicking.com>
 homepage: http://itsclicking.com
 
@@ -18,7 +18,7 @@ environment:
 flutter:
   plugin:
     androidPackage: com.itsclicking.clickapp.fluttersocketio
-    pluginClass: FlutterSocketIOPlugin
+    pluginClass: FlutterSocketIoPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
