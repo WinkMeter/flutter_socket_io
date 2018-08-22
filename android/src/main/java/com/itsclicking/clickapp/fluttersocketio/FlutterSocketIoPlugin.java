@@ -11,11 +11,11 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /**
- * FlutterSocketIOPlugin
+ * FlutterSocketIoPlugin
  */
-public class FlutterSocketIOPlugin implements MethodCallHandler {
+public class FlutterSocketIoPlugin implements MethodCallHandler {
 
-    private static final String TAG = "FlutterSocketIOPlugin";
+    private static final String TAG = "FlutterSocketIoPlugin";
 
     private MethodChannel _channel;
 
@@ -24,10 +24,10 @@ public class FlutterSocketIOPlugin implements MethodCallHandler {
      */
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_socket_io");
-        channel.setMethodCallHandler(new FlutterSocketIOPlugin(channel));
+        channel.setMethodCallHandler(new FlutterSocketIoPlugin(channel));
     }
 
-    private FlutterSocketIOPlugin(MethodChannel channel) {
+    private FlutterSocketIoPlugin(MethodChannel channel) {
         _channel = channel;
     }
 
