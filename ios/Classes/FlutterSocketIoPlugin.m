@@ -1,11 +1,11 @@
-#import "FlutterSocketIOPlugin.h"
+#import "FlutterSocketIoPlugin.h"
 
-@implementation FlutterSocketIOPlugin
+@implementation FlutterSocketIoPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   FlutterMethodChannel* channel = [FlutterMethodChannel
       methodChannelWithName:@"flutter_socket_io"
             binaryMessenger:[registrar messenger]];
-  FlutterSocketIOPlugin* instance = [[FlutterSocketIOPlugin alloc] init];
+  FlutterSocketIoPlugin* instance = [[FlutterSocketIoPlugin alloc] init];
   [registrar addMethodCallDelegate:instance channel:channel];
 }
 

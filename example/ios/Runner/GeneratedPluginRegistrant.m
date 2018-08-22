@@ -3,12 +3,12 @@
 //
 
 #import "GeneratedPluginRegistrant.h"
-#import <flutter_socket_io/FlutterSocketIOPlugin.h>
+#import <flutter_socket_io/FlutterSocketIoPlugin.h>
 
 @implementation GeneratedPluginRegistrant
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
-  [FlutterSocketIOPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterSocketIOPlugin"]];
+  [FlutterSocketIoPlugin registerWithRegistrar:[registry registrarForPlugin:@"FlutterSocketIoPlugin"]];
 }
 
 @end
