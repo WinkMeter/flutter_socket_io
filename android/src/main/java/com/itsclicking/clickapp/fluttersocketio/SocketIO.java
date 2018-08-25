@@ -1,7 +1,5 @@
 package com.itsclicking.clickapp.fluttersocketio;
 
-import android.util.Log;
-
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.engineio.client.transports.WebSocket;
 import com.github.nkzawa.socketio.client.Ack;
@@ -20,7 +18,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import io.flutter.plugin.common.MethodChannel;
 
-public class SocketIO implements ISocketIO {
+public class SocketIO {
 
     private static final String TAG = "SocketIO";
 
@@ -105,12 +103,10 @@ public class SocketIO implements ISocketIO {
         }
     }
 
-    @Override
     public String getId() {
         return getSocketUrl();
     }
 
-    @Override
     public void connect() {
         if(_socket != null && _socket.connected()) {
             Utils.log(TAG, "socket is already connected");
@@ -233,7 +229,6 @@ public class SocketIO implements ISocketIO {
         }
     }
 
-    @Override
     public void sendMessage(String event, String message, final String callback) {
         if (isConnected() && !Utils.isNullOrEmpty(event) && message != null) {
 
@@ -256,7 +251,6 @@ public class SocketIO implements ISocketIO {
         }
     }
 
-    @Override
     public void subscribe(String event, final String callback) {
         if(_socket != null && !Utils.isNullOrEmpty(event)) {
             Utils.log("subscribe", "channel: " + event + " - with callback: " + callback);
@@ -282,7 +276,6 @@ public class SocketIO implements ISocketIO {
         }
     }
 
-    @Override
     public void subscribes(Map<String, String> subscribes) {
         if (_socket != null && !Utils.isNullOrEmpty(subscribes)) {
             for (Map.Entry<String, String> sub : subscribes.entrySet()) {
@@ -293,7 +286,6 @@ public class SocketIO implements ISocketIO {
         }
     }
 
-    @Override
     public void unSubscribe(String eventName, final String callback) {
         if(_socket != null && !Utils.isNullOrEmpty(eventName)) {
 
@@ -325,7 +317,6 @@ public class SocketIO implements ISocketIO {
         }
     }
 
-    @Override
     public void unSubscribes(Map<String, String> subscribes) {
         if (_socket != null && !Utils.isNullOrEmpty(subscribes)) {
             for (Map.Entry<String, String> sub : subscribes.entrySet()) {
@@ -336,7 +327,6 @@ public class SocketIO implements ISocketIO {
         }
     }
 
-    @Override
     public void unSubscribesAll() {
         if (_socket != null && !Utils.isNullOrEmpty(_subscribes)) {
             for (Map.Entry<String, ConcurrentLinkedQueue<SocketListener>> sub : _subscribes.entrySet()) {
@@ -347,7 +337,6 @@ public class SocketIO implements ISocketIO {
         }
     }
 
-    @Override
     public boolean isConnected() {
         if(_socket != null) {
             if(!_socket.connected()) {
@@ -360,14 +349,12 @@ public class SocketIO implements ISocketIO {
         return false;
     }
 
-    @Override
     public void disconnect() {
         if (_socket != null) {
             _socket.disconnect();
         }
     }
 
-    @Override
     public void destroy() {
         Utils.log(TAG, "--- START destroy ---");
         disconnect();

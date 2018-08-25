@@ -48,12 +48,6 @@ public class SocketIOManager implements ISocketIOManager {
         }
     }
 
-    private void removeSocketIO(String socketNameSpace) {
-        if(mSockets != null && isExistedSocketIO(socketNameSpace)) {
-            mSockets.remove(socketNameSpace);
-        }
-    }
-
     private void removeSocketIO(SocketIO socketIO) {
         if(mSockets != null) {
             mSockets.remove(socketIO.getId());

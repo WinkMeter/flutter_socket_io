@@ -16,7 +16,6 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 public class FlutterSocketIoPlugin implements MethodCallHandler {
 
     private static final String TAG = "FlutterSocketIoPlugin";
-
     private MethodChannel _channel;
 
     /**
