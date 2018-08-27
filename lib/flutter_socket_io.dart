@@ -85,13 +85,21 @@ class SocketIO {
     return null;
   }
 
+  /// Init socket before doing anything with socket
+  Future<void> init() async {
+    await _channel.invokeMethod(MethodCallName.SOCKET_INIT, {
+      MethodCallArgumentsName.SOCKET_DOMAIN: _domain,
+      MethodCallArgumentsName.SOCKET_NAME_SPACE: _namespace,
+      MethodCallArgumentsName.SOCKET_QUERY: _query,
+      MethodCallArgumentsName.SOCKET_CALLBACK: _statusCallbackName
+    });
+  }
+
   /// Create a new socket and connects the client
   Future<void> connect() async {
     await _channel.invokeMethod(MethodCallName.SOCKET_CONNECT, {
       MethodCallArgumentsName.SOCKET_DOMAIN: _domain,
       MethodCallArgumentsName.SOCKET_NAME_SPACE: _namespace,
-      MethodCallArgumentsName.SOCKET_QUERY: _query,
-      MethodCallArgumentsName.SOCKET_CALLBACK: _statusCallbackName
     });
   }
 
@@ -315,6 +323,7 @@ class MethodCallArgumentsName {
 }
 
 class MethodCallName {
+  static final String SOCKET_INIT = "socketInit";
   static final String SOCKET_CONNECT = "socketConnect";
   static final String SOCKET_DISCONNECT = "socketDisconnect";
   static final String SOCKET_SUBSCRIBES = "socketSubcribes";

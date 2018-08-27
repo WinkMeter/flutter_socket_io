@@ -54,10 +54,21 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _connectSocket() {
-    //    socketIO = new SocketIO("http://172.16.3.185:3000/chat", null,
-    socketIO = new SocketIO("http://dev.api.winkers.me:3000/chat", null,
-        query: "userId=59117d4a17b2c3041827b717", socketStatusCallback: _socketStatus);
+    socketIO = new SocketIO("http://127.0.0.1:3000", "/chat",
+        query: "userId=21031", socketStatusCallback: _socketStatus);
+
+    //call init socket before doing anything
+    socketIO.init();
+
+    //subscribe event
+    socketIO.subscribe("socket_info", _onSocketInfo);
+
+    //connect socket
     socketIO.connect();
+  }
+
+  _onSocketInfo(dynamic data) {
+    print("Socket info: " + data);
   }
 
   _socketStatus(dynamic data) {

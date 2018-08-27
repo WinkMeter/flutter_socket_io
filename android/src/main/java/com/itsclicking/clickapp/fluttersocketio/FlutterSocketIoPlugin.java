@@ -39,9 +39,13 @@ public class FlutterSocketIoPlugin implements MethodCallHandler {
         Utils.log(TAG, "onMethodCall: " + call.method + " - domain: " + socketDomain + " - with namespace: " + socketNameSpace);
 
         switch (call.method) {
-            case SocketIOManager.MethodCallName.SOCKET_CONNECT:
+            case SocketIOManager.MethodCallName.SOCKET_INIT:
                 String query = call.argument(SocketIOManager.MethodCallArgumentsName.SOCKET_QUERY);
-                SocketIOManager.getInstance().connect(_channel, socketDomain, socketNameSpace, query, callback);
+                SocketIOManager.getInstance().init(_channel, socketDomain, socketNameSpace, query, callback);
+                break;
+
+            case SocketIOManager.MethodCallName.SOCKET_CONNECT:
+                SocketIOManager.getInstance().connect(socketDomain, socketNameSpace);
                 break;
 
             case SocketIOManager.MethodCallName.SOCKET_DISCONNECT:

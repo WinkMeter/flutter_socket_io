@@ -51,42 +51,6 @@ public class SocketIO {
         return _domain + (_namespace == null ? "" : _namespace);
     }
 
-    public void dumpSocketInfo() {
-        Utils.log("SocketIO info", "--- BEFORE DUMPING SOCKET INFO ---");
-
-        Utils.log("socketInfo", "SOCKET ID: " + getId());
-
-        if(_socket != null) {
-            Utils.log("socketInfo", "status: " + String.valueOf(isConnected()));
-        } else {
-            Utils.log("socketInfo", "status: SOCKET IS NULL");
-        }
-
-        dumpChannelsInfo();
-
-        Utils.log("SocketIO info", "--- END DUMPING SOCKET INFO ---");
-    }
-
-    private void dumpChannelsInfo() {
-        if(!Utils.isNullOrEmpty(_subscribes)) {
-            Utils.log("socketInfo", "SUBSCRIBES SIZES: " + _subscribes.size());
-            for(Map.Entry<String, ConcurrentLinkedQueue<SocketListener>> item : _subscribes.entrySet()) {
-                Utils.log("socketInfo", "--- START channel: " + item.getKey());
-                ConcurrentLinkedQueue<SocketListener> listeners = item.getValue();
-                if(Utils.isNullOrEmpty(listeners)) {
-                    Utils.log("socketInfo", "LISTENER: NULL");
-                } else {
-                    for (SocketListener listener : listeners) {
-                        Utils.log("socketInfo", "LISTENER: " + listener.getCallback());
-                    }
-                }
-                Utils.log("socketInfo", "--- END channel: " + item.getKey());
-            }
-        } else {
-            Utils.log("socketInfo", "SUBSCRIBES SIZES: NULL or EMPTY");
-        }
-    }
-
     private void dumpChannelsCount() {
         if(!Utils.isNullOrEmpty(_subscribes)) {
             Utils.log("socketInfo", "SUBSCRIBES SIZES: " + _subscribes.size());
@@ -107,7 +71,7 @@ public class SocketIO {
         return getSocketUrl();
     }
 
-    private void init() {
+    public void init() {
         if(_socket != null) {
             if(_socket.connected()) {
                 _socket.disconnect();
@@ -133,7 +97,6 @@ public class SocketIO {
             _socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    Utils.log(TAG, "socket connected");
                     if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
                         _methodChannel.invokeMethod(_statusCallback, Socket.EVENT_CONNECT);
                     }
@@ -143,7 +106,6 @@ public class SocketIO {
             _socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    Utils.log(TAG, "socket reconnected");
                     if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
                         _methodChannel.invokeMethod(_statusCallback, Socket.EVENT_RECONNECT);
                     }
@@ -226,25 +188,24 @@ public class SocketIO {
         }
     }
 
-    public void setQuery(String query) {
-        _query = query;
-    }
-
     public void connect() {
         if(_socket == null) {
-            Utils.log(TAG, "socket is not initialized!");
+            Utils.log(TAG, "socket: " + getId() + " is not initialized!");
             return;
         }
         if(_socket.connected()) {
-            Utils.log(TAG, "socket is already connected");
+            Utils.log(TAG, "socket: " + getId() + " is already connected");
             return;
         }
+        Utils.log(TAG, "connecting socket: " + getId());
         _socket.connect();
     }
 
     public void sendMessage(String event, String message, final String callback) {
-        if (isConnected() && !Utils.isNullOrEmpty(event) && message != null) {
 
+        if(Utils.isNullOrEmpty(event) || Utils.isNullOrEmpty(message)) {
+            Utils.log("sendMessage", "Invalid params: event or message is NULL or EMPTY!");
+        } else if(isConnected()) {
             Utils.log("sendMessage", "Event: " + event + " - with message: " + message);
             JSONObject jb = null;
             try {
@@ -252,7 +213,7 @@ public class SocketIO {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            if(jb != null) {
+            if (jb != null) {
                 final SocketListener listener = new SocketListener(_methodChannel, event, callback);
                 _socket.emit(event, jb, new Ack() {
                     @Override
@@ -262,35 +223,43 @@ public class SocketIO {
                 });
             }
         }
+
     }
 
     public void subscribe(String event, final String callback) {
-        if(_socket != null && !Utils.isNullOrEmpty(event)) {
-            Utils.log("subscribe", "channel: " + event + " - with callback: " + callback);
+        Utils.log("subscribe", "channel: " + event + " - with callback: " + callback);
+        if(Utils.isNullOrEmpty(event)) {
+            Utils.log("subscribe", "Invalid params: event is NULL/EMPTY!");
+        } else {
+            if(_socket != null) {
+                dumpChannelsCount();
+                ConcurrentLinkedQueue<SocketListener> listeners = _subscribes.get(event);
 
-            dumpChannelsCount();
+                if(listeners == null) {
+                    listeners = new ConcurrentLinkedQueue<>();
+                }
 
-            ConcurrentLinkedQueue<SocketListener> listeners = _subscribes.get(event);
+                SocketListener listener = new SocketListener(_methodChannel, event, callback);
 
-            if(listeners == null) {
-                listeners = new ConcurrentLinkedQueue<>();
+                if(!Utils.isNullOrEmpty(callback) && !Utils.isExisted(listeners, callback)) {
+                    listeners.add(listener);
+                }
+
+                _subscribes.put(event, listeners);
+                _socket.on(event, listener);
+
+                dumpChannelsCount();
+            } else {
+                Utils.log("subscribe", "socket is NULL");
             }
-
-            SocketListener listener = new SocketListener(_methodChannel, event, callback);
-
-            if(!Utils.isNullOrEmpty(callback) && !Utils.isExisted(listeners, callback)) {
-                listeners.add(listener);
-            }
-
-            _subscribes.put(event, listeners);
-            _socket.on(event, listener);
-
-            dumpChannelsCount();
         }
     }
 
     public void subscribes(Map<String, String> subscribes) {
-        if (_socket != null && !Utils.isNullOrEmpty(subscribes)) {
+        if(Utils.isNullOrEmpty(subscribes)) {
+            Utils.log("subscribes", "Subscribes list is NULL or EMPTY!");
+        } else if (_socket != null) {
+            Utils.log(TAG, "--- subscribes ---" + new Gson().toJson(subscribes));
             for (Map.Entry<String, String> sub : subscribes.entrySet()) {
                 if (!Utils.isNullOrEmpty(sub.getKey())) {
                     subscribe(sub.getKey(), sub.getValue());
@@ -300,39 +269,43 @@ public class SocketIO {
     }
 
     public void unSubscribe(String eventName, final String callback) {
-        if(_socket != null && !Utils.isNullOrEmpty(eventName)) {
+        Utils.log("unSubscribe", "channel: " + eventName + " - with callback: " + callback);
+        if(Utils.isNullOrEmpty(eventName)) {
+            Utils.log("unSubscribe", "Invalid params: event is NULL or EMPTY!");
+        } else {
+            if(_socket != null) {
+                dumpChannelsCount();
+                ConcurrentLinkedQueue<SocketListener> listeners = _subscribes.get(eventName);
+                if(listeners == null || Utils.isNullOrEmpty(callback)) {
+                    _subscribes.remove(eventName);
+                    _socket.off(eventName);
+                } else {
+                    SocketListener listener = Utils.findListener(listeners, callback);
+                    if(listener != null) {
 
-            dumpChannelsCount();
-
-            Utils.log("unSubscribe", "channel: " + eventName + " - with callback: " + callback);
-
-            ConcurrentLinkedQueue<SocketListener> listeners = _subscribes.get(eventName);
-
-            if(listeners == null || Utils.isNullOrEmpty(callback)) {
-                _subscribes.remove(eventName);
-                _socket.off(eventName);
-            } else {
-                SocketListener listener = Utils.findListener(listeners, callback);
-                if(listener != null) {
-
-                    listeners.remove(listener);
-                    if(listeners.size() < 1) {
-                        _subscribes.remove(eventName);
-                        _socket.off(eventName);
-                    } else {
-                        _subscribes.put(eventName, listeners);
-                        _socket.off(eventName, listener);
+                        listeners.remove(listener);
+                        if(listeners.size() < 1) {
+                            _subscribes.remove(eventName);
+                            _socket.off(eventName);
+                        } else {
+                            _subscribes.put(eventName, listeners);
+                            _socket.off(eventName, listener);
+                        }
                     }
                 }
+                dumpChannelsCount();
+            } else {
+                Utils.log("unSubscribe", "socket is NULL");
             }
-
-            dumpChannelsCount();
         }
     }
 
-    public void unSubscribes(Map<String, String> subscribes) {
-        if (_socket != null && !Utils.isNullOrEmpty(subscribes)) {
-            for (Map.Entry<String, String> sub : subscribes.entrySet()) {
+    public void unSubscribes(Map<String, String> unSubscribes) {
+        if(Utils.isNullOrEmpty(unSubscribes)) {
+            Utils.log("unSubscribes", "unSubscribes list is NULL or EMPTY!");
+        } else if (_socket != null) {
+            Utils.log(TAG, "--- unSubscribes ---" + new Gson().toJson(unSubscribes));
+            for (Map.Entry<String, String> sub : unSubscribes.entrySet()) {
                 if (!Utils.isNullOrEmpty(sub.getKey())) {
                     unSubscribe(sub.getKey(), sub.getValue());
                 }
@@ -352,9 +325,7 @@ public class SocketIO {
 
     public boolean isConnected() {
         if(_socket != null) {
-            if(!_socket.connected()) {
-                Utils.log(TAG, "socket id: " + getId() + " is disconnected");
-            }
+            Utils.log(TAG, "socket id: " + getId() + " is connected: " + _socket.connected());
             return _socket.connected();
         } else {
             Utils.log(TAG, "socket id: " + getId() + " is NULL");

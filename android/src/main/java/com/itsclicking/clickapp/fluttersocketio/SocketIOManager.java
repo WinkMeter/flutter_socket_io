@@ -1,7 +1,5 @@
 package com.itsclicking.clickapp.fluttersocketio;
 
-import com.google.gson.Gson;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,16 +24,18 @@ public class SocketIOManager implements ISocketIOManager {
     }
 
     private SocketIO getSocket(String socketId) {
-        if(mSockets != null) {
+        if(mSockets != null && !Utils.isNullOrEmpty(socketId)) {
             Utils.log("TOTAL SOCKETS: ", String.valueOf(mSockets.size()));
             return mSockets.get(socketId);
+        } else {
+            Utils.log("TOTAL SOCKETS: ", "NULL");
         }
         return null;
     }
 
     private boolean isExistedSocketIO(String socketId) {
-        return !Utils.isNullOrEmpty(socketId) && !Utils.isNullOrEmpty(mSockets)
-                && mSockets.containsKey(socketId);
+        SocketIO socketIO = getSocket(socketId);
+        return (socketIO != null);
     }
 
     private void addSocketIO(SocketIO socketIO) {
@@ -71,57 +71,53 @@ public class SocketIOManager implements ISocketIOManager {
     }
 
     @Override
-    public void connect(MethodChannel channel, String domain, String namespace, String query, final String callback) {
-        Utils.log(TAG, "--- START connect ---");
-        Utils.log(TAG, "connect " + domain + namespace + " - Callback: " + callback);
-        if(!isExistedSocketIO(getSocketId(domain, namespace))) {
-            SocketIO socketIO = createSocketIO(channel, domain, namespace, query, callback);
-            socketIO.connect();
-            addSocketIO(socketIO);
+    public void init(MethodChannel channel, String domain, String namespace, String query, String callback) {
+        if(isExistedSocketIO(getSocketId(domain, namespace))) {
+            Utils.log(TAG, "socket: " + getSocketId(domain, namespace) + " already existed!");
         } else {
-            SocketIO socketIO = getSocket(getSocketId(domain, namespace));
-            if(socketIO != null && !socketIO.isConnected()) {
-                socketIO.connect();
-            }
+            SocketIO socketIO = createSocketIO(channel, domain, namespace, query, callback);
+            addSocketIO(socketIO);
+            socketIO.init();
         }
-        Utils.log(TAG, "--- END connect ---");
+    }
+
+    @Override
+    public void connect(String domain, String namespace) {
+        SocketIO socketIO = getSocket(getSocketId(domain, namespace));
+        if(socketIO != null) {
+            socketIO.connect();
+        } else {
+            Utils.log(TAG, "socket: " + getSocketId(domain, namespace) + " is not initialized!");
+        }
     }
 
     @Override
     public void sendMessage(String domain, String namespace, String event, String message, String callback) {
-        if (!Utils.isNullOrEmpty(event) && message != null) {
-            Utils.log(TAG, "--- START sendMessage ---");
-            SocketIO socketIO = getSocket(getSocketId(domain, namespace));
-            if(isConnected(socketIO)) {
-                socketIO.sendMessage(event, message, callback);
-            }
-            Utils.log(TAG, "--- END sendMessage ---");
+        SocketIO socketIO = getSocket(getSocketId(domain, namespace));
+        if(socketIO != null) {
+            socketIO.sendMessage(event, message, callback);
+        } else {
+            Utils.log(TAG, " not found socket: " + getSocketId(domain, namespace));
         }
     }
 
     @Override
     public void subscribes(String domain, String namespace, Map<String, String> subscribes) {
-        if (!Utils.isNullOrEmpty(subscribes)) {
-            Utils.log(TAG, "--- START subscribes ---");
-            SocketIO socketIO = getSocket(getSocketId(domain, namespace));
-            if(isConnected(socketIO)) {
-                Utils.log(TAG, "--- subscribes ---" + new Gson().toJson(subscribes));
-                socketIO.subscribes(subscribes);
-            }
-            Utils.log(TAG, "--- END subscribes ---");
+        SocketIO socketIO = getSocket(getSocketId(domain, namespace));
+        if(socketIO != null) {
+            socketIO.subscribes(subscribes);
+        } else {
+            Utils.log(TAG, " not found socket: " + getSocketId(domain, namespace));
         }
     }
 
     @Override
     public void unSubscribes(String domain, String namespace, Map<String, String> subscribes) {
-        if (!Utils.isNullOrEmpty(subscribes)) {
-            Utils.log(TAG, "--- START unSubscribes ---");
-            SocketIO socketIO = getSocket(getSocketId(domain, namespace));
-            if(isConnected(socketIO)) {
-                Utils.log(TAG, "--- unSubscribes ---" + new Gson().toJson(subscribes));
-                socketIO.unSubscribes(subscribes);
-            }
-            Utils.log(TAG, "--- END unSubscribes ---");
+        SocketIO socketIO = getSocket(getSocketId(domain, namespace));
+        if(socketIO != null) {
+            socketIO.unSubscribes(subscribes);
+        } else {
+            Utils.log(TAG, " not found socket: " + getSocketId(domain, namespace));
         }
     }
 
@@ -129,8 +125,10 @@ public class SocketIOManager implements ISocketIOManager {
     public void unSubscribesAll(String domain, String namespace) {
         Utils.log(TAG, "--- START unSubscribesAll ---");
         SocketIO socketIO = getSocket(getSocketId(domain, namespace));
-        if(isConnected(socketIO)) {
+        if(socketIO != null) {
             socketIO.unSubscribesAll();
+        } else {
+            Utils.log(TAG, " not found socket: " + getSocketId(domain, namespace));
         }
         Utils.log(TAG, "--- END unSubscribesAll ---");
     }
@@ -141,6 +139,8 @@ public class SocketIOManager implements ISocketIOManager {
         SocketIO socketIO = getSocket(getSocketId(domain, namespace));
         if(socketIO != null) {
             socketIO.disconnect();
+        } else {
+            Utils.log(TAG, " not found socket: " + getSocketId(domain, namespace));
         }
         Utils.log(TAG, "--- END disconnect ---");
     }
@@ -152,6 +152,8 @@ public class SocketIOManager implements ISocketIOManager {
             if(socketIO != null) {
                 removeSocketIO(socketIO);
                 socketIO.destroy();
+            }  else {
+                Utils.log(TAG, " not found socket: " + getSocketId(domain, namespace));
             }
         }
     }
@@ -171,17 +173,6 @@ public class SocketIOManager implements ISocketIOManager {
         }
     }
 
-    private void dumpSocketsInfo() {
-        if(!Utils.isNullOrEmpty(mSockets)) {
-            for(Map.Entry<String, SocketIO> item : mSockets.entrySet()) {
-                SocketIO socketIO = item.getValue();
-                if(socketIO != null) {
-                    socketIO.dumpSocketInfo();
-                }
-            }
-        }
-    }
-
     public static class MethodCallArgumentsName {
         public static final String SOCKET_DOMAIN = "socketDomain";
         public static final String SOCKET_NAME_SPACE = "socketNameSpace";
@@ -193,6 +184,7 @@ public class SocketIOManager implements ISocketIOManager {
     }
 
     public static class MethodCallName {
+        public static final String SOCKET_INIT = "socketInit";
         public static final String SOCKET_CONNECT = "socketConnect";
         public static final String SOCKET_DISCONNECT = "socketDisconnect";
         public static final String SOCKET_SUBSCRIBES = "socketSubcribes";
