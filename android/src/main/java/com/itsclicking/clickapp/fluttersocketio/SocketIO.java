@@ -107,12 +107,13 @@ public class SocketIO {
         return getSocketUrl();
     }
 
-    public void connect() {
-        if(_socket != null && _socket.connected()) {
-            Utils.log(TAG, "socket is already connected");
-            return;
+    private void init() {
+        if(_socket != null) {
+            if(_socket.connected()) {
+                _socket.disconnect();
+            }
+            _socket = null;
         }
-
         try {
             mOptions = new IO.Options();
             mOptions.transports = new String[]{WebSocket.NAME};
@@ -217,16 +218,28 @@ public class SocketIO {
             });
 
             //end listen connection events
-
-            //starting connect socket
-            _socket.connect();
-
         } catch (URISyntaxException e) {
             Utils.log(TAG, "connect fail : " + e.toString());
             if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
                 _methodChannel.invokeMethod(_statusCallback, "failed");
             }
         }
+    }
+
+    public void setQuery(String query) {
+        _query = query;
+    }
+
+    public void connect() {
+        if(_socket == null) {
+            Utils.log(TAG, "socket is not initialized!");
+            return;
+        }
+        if(_socket.connected()) {
+            Utils.log(TAG, "socket is already connected");
+            return;
+        }
+        _socket.connect();
     }
 
     public void sendMessage(String event, String message, final String callback) {
