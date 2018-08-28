@@ -54,8 +54,8 @@
 - (void)removeChannelAll {
     if (self.subscribes) {
         [self.subscribes removeAllObjects];
-        self.subscribes = nil;
     }
+    self.subscribes = nil;
 }
 
 - (NSString *)getId {
@@ -74,8 +74,8 @@
     if (self.socket) {
         if ([self isConnected]) {
             [self disconnect];
-            self.socket = nil;
         }
+        self.socket = nil;
     }
     @try {
         NSURL *url = [NSURL URLWithString:self.domain];

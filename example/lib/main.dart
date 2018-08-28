@@ -54,6 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _connectSocket() {
+    //update your domain before using
     socketIO = new SocketIO("http://127.0.0.1:3000", "/chat",
         query: "userId=21031", socketStatusCallback: _socketStatus);
 
@@ -77,14 +78,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _subscribes() {
     if (socketIO != null) {
-//      socketIO.subscribe("socket_info", socketInfo);
-      socketIO.unSubscribe("chat_direct", _onReceiveChatMessage);
+      socketIO.subscribe("chat_direct", _onReceiveChatMessage);
     }
   }
 
   _unSubscribes() {
     if (socketIO != null) {
-//      socketIO.unSubscribe("socket_info", socketInfo);
       socketIO.unSubscribe("chat_direct", _onReceiveChatMessage);
     }
   }

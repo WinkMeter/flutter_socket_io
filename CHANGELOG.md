@@ -1,3 +1,6 @@
+## 0.3.0
+* Supported iOS (Testing).
+
 ## 0.2.0
 * Added function: init() socket (please call this function before doing anything with socket)
 
