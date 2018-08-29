@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_socket_io/flutter_socket_io.dart';
+import 'package:flutter_socket_io/socket_io_manager.dart';
 
 void main() => runApp(new MyApp());
 
@@ -47,16 +48,18 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   var mTextMessageController = new TextEditingController();
   SocketIO socketIO;
+  SocketIO socketIO02;
 
   @override
   void initState() {
     super.initState();
   }
 
-  _connectSocket() {
+  _connectSocket01() {
     //update your domain before using
-    socketIO = new SocketIO("http://127.0.0.1:3000", "/chat",
-        query: "userId=21031", socketStatusCallback: _socketStatus);
+    /*socketIO = new SocketIO("http://127.0.0.1:3000", "/chat",
+        query: "userId=21031", socketStatusCallback: _socketStatus);*/
+    socketIO = SocketIOManager().createSocketIO("http://dev.api.winkers.me:3000", "/chat", query: "userId=59117d4a17b2c3041827b717", socketStatusCallback: _socketStatus);
 
     //call init socket before doing anything
     socketIO.init();
@@ -68,12 +71,33 @@ class _MyHomePageState extends State<MyHomePage> {
     socketIO.connect();
   }
 
+  _connectSocket02() {
+    socketIO02 = SocketIOManager().createSocketIO("http://dev.api.winkers.me:3000", "/map", query: "userId=59117d4a17b2c3041827b717", socketStatusCallback: _socketStatus02);
+
+    //call init socket before doing anything
+    socketIO02.init();
+
+    //subscribe event
+    socketIO02.subscribe("socket_info", _onSocketInfo02);
+
+    //connect socket
+    socketIO02.connect();
+  }
+
   _onSocketInfo(dynamic data) {
     print("Socket info: " + data);
   }
 
   _socketStatus(dynamic data) {
     print("Socket status: " + data);
+  }
+
+  _onSocketInfo02(dynamic data) {
+    print("Socket 02 info: " + data);
+  }
+
+  _socketStatus02(dynamic data) {
+    print("Socket 02 status: " + data);
   }
 
   _subscribes() {
@@ -90,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _reconnectSocket() {
     if (socketIO == null) {
-      _connectSocket();
+      _connectSocket01();
     } else {
       socketIO.connect();
     }
@@ -104,13 +128,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   _destroySocket() {
     if (socketIO != null) {
-      socketIO.destroy();
+      SocketIOManager().destroySocket(socketIO);
     }
   }
 
   void _sendChatMessage(String msg) async {
     if (socketIO != null) {
-//      String jsonData = "{\"message\":{\"type\":\"Text\",\"content\":\"Chạy bo thôi Hà pé ơi =))\",\"owner\":\"589f10b9bbcd694aa570988d\",\"avatar\":\"img/avatar-default.png\"},\"sender\":{\"userId\":\"589f10b9bbcd694aa570988d\",\"first\":\"Ha\",\"last\":\"Test 2\",\"location\":{\"lat\":10.792273999999999,\"long\":106.6430356,\"accuracy\":38,\"regionId\":null,\"vendor\":\"gps\",\"verticalAccuracy\":null},\"name\":\"Ha Test 2\"},\"receivers\":[\"587e1147744c6260e2d3a4af\"],\"conversationId\":\"589f116612aa254aa4fef79f\",\"name\":null,\"isAnonymous\":null}";
       String jsonData =
           '{"message":{"type":"Text","content": ${(msg != null && msg.isNotEmpty) ? '"${msg}"' : '"Hello SOCKET IO PLUGIN :))"'},"owner":"589f10b9bbcd694aa570988d","avatar":"img/avatar-default.png"},"sender":{"userId":"589f10b9bbcd694aa570988d","first":"Ha","last":"Test 2","location":{"lat":10.792273999999999,"long":106.6430356,"accuracy":38,"regionId":null,"vendor":"gps","verticalAccuracy":null},"name":"Ha Test 2"},"receivers":["587e1147744c6260e2d3a4af"],"conversationId":"589f116612aa254aa4fef79f","name":null,"isAnonymous":null}';
       socketIO.sendMessage("chat_direct", jsonData, _onReceiveChatMessage);
@@ -173,32 +196,35 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            new TextField(
-              controller: mTextMessageController,
-              maxLines: 2,
-            ),
-            new Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
             new RaisedButton(
-              child: const Text('SEND', style: TextStyle(color: Colors.white)),
+              child:
+                  const Text('CONNECT  SOCKET 01', style: TextStyle(color: Colors.white)),
               color: Theme.of(context).accentColor,
               elevation: 0.0,
               splashColor: Colors.blueGrey,
               onPressed: () {
-                _showToast();
+                _connectSocket01();
 //                _sendChatMessage(mTextMessageController.text);
               },
             ),
             new RaisedButton(
               child:
-                  const Text('CONNECT', style: TextStyle(color: Colors.white)),
+              const Text('CONNECT SOCKET 02', style: TextStyle(color: Colors.white)),
               color: Theme.of(context).accentColor,
               elevation: 0.0,
               splashColor: Colors.blueGrey,
               onPressed: () {
-                _connectSocket();
+                _connectSocket02();
+//                _sendChatMessage(mTextMessageController.text);
+              },
+            ),
+            new RaisedButton(
+              child: const Text('SEND MESSAGE', style: TextStyle(color: Colors.white)),
+              color: Theme.of(context).accentColor,
+              elevation: 0.0,
+              splashColor: Colors.blueGrey,
+              onPressed: () {
+                _showToast();
 //                _sendChatMessage(mTextMessageController.text);
               },
             ),

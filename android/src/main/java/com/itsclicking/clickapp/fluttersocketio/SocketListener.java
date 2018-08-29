@@ -1,18 +1,19 @@
 package com.itsclicking.clickapp.fluttersocketio;
 
 import com.github.nkzawa.emitter.Emitter;
-import com.google.gson.Gson;
 
 import io.flutter.plugin.common.MethodChannel;
 
 public class SocketListener implements Emitter.Listener {
 
     private MethodChannel _methodChannel;
+    private String _socketId;
     private String _event;
     private String _callback;
 
-    public SocketListener(MethodChannel methodChannel, String event, String callback) {
+    public SocketListener(MethodChannel methodChannel, String socketId, String event, String callback) {
         _methodChannel = methodChannel;
+        _socketId = socketId;
         _event = event;
         _callback = callback;
     }
@@ -25,7 +26,7 @@ public class SocketListener implements Emitter.Listener {
     public void call(Object... args) {
         if (args != null && _methodChannel != null && !Utils.isNullOrEmpty(_event)
                 && !Utils.isNullOrEmpty(_callback)) {
-            _methodChannel.invokeMethod(_event + "|" + _callback, args[0].toString());
+            _methodChannel.invokeMethod(_socketId + "|" +_event + "|" + _callback, args[0].toString());
         }
     }
 }

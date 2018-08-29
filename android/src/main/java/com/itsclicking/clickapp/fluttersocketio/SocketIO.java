@@ -71,6 +71,15 @@ public class SocketIO {
         return getSocketUrl();
     }
 
+    private void onSocketCallback(String status, Object... args) {
+        if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
+            _methodChannel.invokeMethod(getId() + "|" +_statusCallback + "|" + _statusCallback, status);
+        }
+        if(args != null) {
+            Utils.log(TAG, status + ": " + new Gson().toJson(args));
+        }
+    }
+
     public void init() {
         if(_socket != null) {
             if(_socket.connected()) {
@@ -97,54 +106,42 @@ public class SocketIO {
             _socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
-                        _methodChannel.invokeMethod(_statusCallback, Socket.EVENT_CONNECT);
-                    }
+                    onSocketCallback(Socket.EVENT_CONNECT, args);
                 }
             });
 
             _socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
-                        _methodChannel.invokeMethod(_statusCallback, Socket.EVENT_RECONNECT);
-                    }
+                    onSocketCallback(Socket.EVENT_RECONNECT, args);
                 }
             });
 
             _socket.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
-                        _methodChannel.invokeMethod(_statusCallback, Socket.EVENT_RECONNECTING);
-                    }
+                    onSocketCallback(Socket.EVENT_RECONNECTING, args);
                 }
             });
 
             _socket.on(Socket.EVENT_RECONNECT_ATTEMPT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
-                        _methodChannel.invokeMethod(_statusCallback, Socket.EVENT_RECONNECT_ATTEMPT);
-                    }
+                    onSocketCallback(Socket.EVENT_RECONNECT_ATTEMPT, args);
                 }
             });
 
             _socket.on(Socket.EVENT_RECONNECT_FAILED, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
-                        _methodChannel.invokeMethod(_statusCallback, Socket.EVENT_RECONNECT_FAILED);
-                    }
+                    onSocketCallback(Socket.EVENT_RECONNECT_FAILED, args);
                 }
             });
 
             _socket.on(Socket.EVENT_RECONNECT_ERROR, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
-                        _methodChannel.invokeMethod(_statusCallback, Socket.EVENT_RECONNECT_ERROR);
-                    }
+                    onSocketCallback(Socket.EVENT_RECONNECT_ERROR, args);
                 }
             });
 
@@ -152,30 +149,21 @@ public class SocketIO {
             _socket.on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
-                        _methodChannel.invokeMethod(_statusCallback, Socket.EVENT_CONNECT_TIMEOUT);
-                    }
+                    onSocketCallback(Socket.EVENT_CONNECT_TIMEOUT, args);
                 }
             });
 
             _socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
-                        _methodChannel.invokeMethod(_statusCallback, Socket.EVENT_DISCONNECT);
-                    }
+                    onSocketCallback(Socket.EVENT_DISCONNECT, args);
                 }
             });
 
             _socket.on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
-                    if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
-                        if(args != null) {
-                            Utils.log(TAG, "EVENT_CONNECT_ERROR: " + new Gson().toJson(args));
-                        }
-                        _methodChannel.invokeMethod(_statusCallback, Socket.EVENT_CONNECT_ERROR);
-                    }
+                    onSocketCallback(Socket.EVENT_CONNECT_ERROR, args);
                 }
             });
 
@@ -214,7 +202,7 @@ public class SocketIO {
                 e.printStackTrace();
             }
             if (jb != null) {
-                final SocketListener listener = new SocketListener(_methodChannel, event, callback);
+                final SocketListener listener = new SocketListener(_methodChannel, getId(), event, callback);
                 _socket.emit(event, jb, new Ack() {
                     @Override
                     public void call(Object... args) {
@@ -239,7 +227,7 @@ public class SocketIO {
                     listeners = new ConcurrentLinkedQueue<>();
                 }
 
-                SocketListener listener = new SocketListener(_methodChannel, event, callback);
+                SocketListener listener = new SocketListener(_methodChannel, getId(), event, callback);
 
                 if(!Utils.isNullOrEmpty(callback) && !Utils.isExisted(listeners, callback)) {
                     listeners.add(listener);

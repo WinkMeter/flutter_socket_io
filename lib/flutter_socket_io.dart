@@ -5,70 +5,45 @@ import 'package:flutter/services.dart';
 
 class SocketIO {
 
-  static const MethodChannel _channel = const MethodChannel('flutter_socket_io');
-
   String _domain;
   String _namespace;
   String _query;
   Function _statusCallback;
   String _statusCallbackName;
+  MethodChannel _channel;
 
   Map<String, CallbackFunctions> _callbacks;
 
   ///domain: domain url
   ///namespace: just for iOS
   ///socketStatusCallback [optional]: the status of socket [connect/disconnect/reconnect/...] will be sent into this function
-  SocketIO(String domain, String namespace, {String query, Function socketStatusCallback}) {
+  SocketIO(MethodChannel channel, String domain, String namespace, {String query, Function socketStatusCallback}) {
+    _channel = channel;
     _domain = domain;
     _namespace = namespace;
     _query = query;
+
+    _callbacks = new Map();
     _statusCallback = socketStatusCallback;
     _statusCallbackName = _parserFunctionName(socketStatusCallback);
-    _channel.setMethodCallHandler(_handlerMethodCall);
-    _callbacks = new Map();
   }
 
-  dynamic _parserMethodCall(String method) {
-    if (method != null && method.isNotEmpty && method.contains("|")) {
-      return method.split("|");
+  Future<dynamic> handlerMethodCall(String event, String callbackFuncName, dynamic arguments) {
+     if (event != null && event.isNotEmpty) {
+       if (event == _statusCallbackName && _statusCallback != null) {
+         _statusCallback(arguments);
+       } else {
+         CallbackFunctions functions = _callbacks[event];
+         if (functions != null) {
+           SocketIOFunction f = functions.getFunctionByName(callbackFuncName);
+           if (f != null && f.function != null) {
+             print("CALLLING FUNCTION: " + f.functionName);
+             f.function(arguments);
+             return null;
+           }
+         }
+       }
     }
-    return null;
-  }
-
-  Future<dynamic> _handlerMethodCall(MethodCall call) {
-    print("method: " + call.method);
-
-    //invoke function String with structure: event|method
-    //example: socket_info|onSocketInfo
-    if (call.method.contains("|")) {
-
-      if(call.method.contains("_onReceiveChatMessage")) {
-        print(call.method);
-      }
-
-      dynamic params = _parserMethodCall(call.method);
-      print(params);
-
-      if (params != null && params.length > 1) {
-        String event = params[0];
-        if (event != null && event.isNotEmpty) {
-
-          CallbackFunctions functions = _callbacks[event];
-          if (functions != null) {
-            SocketIOFunction f = functions.getFunctionByName(params[1]);
-            if (f != null && f.function != null) {
-              print("CALLLING FUNCTION: " + f.functionName);
-              f.function(call.arguments);
-              return null;
-            }
-          }
-
-        }
-      }
-    } else if (call.method == _statusCallbackName && _statusCallback != null) {
-      _statusCallback(call.arguments);
-    }
-    return null;
   }
 
   _clearAll() {
