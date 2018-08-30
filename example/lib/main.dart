@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //update your domain before using
     /*socketIO = new SocketIO("http://127.0.0.1:3000", "/chat",
         query: "userId=21031", socketStatusCallback: _socketStatus);*/
-    socketIO = SocketIOManager().createSocketIO("http://dev.api.winkers.me:3000", "/chat", query: "userId=59117d4a17b2c3041827b717", socketStatusCallback: _socketStatus);
+    socketIO = SocketIOManager().createSocketIO("http://127.0.0.1:3000", "/chat", query: "userId=21031", socketStatusCallback: _socketStatus);
 
     //call init socket before doing anything
     socketIO.init();
@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _connectSocket02() {
-    socketIO02 = SocketIOManager().createSocketIO("http://dev.api.winkers.me:3000", "/map", query: "userId=59117d4a17b2c3041827b717", socketStatusCallback: _socketStatus02);
+    socketIO02 = SocketIOManager().createSocketIO("http://127.0.0.1:3000", "/map", query: "userId=21031", socketStatusCallback: _socketStatus02);
 
     //call init socket before doing anything
     socketIO02.init();

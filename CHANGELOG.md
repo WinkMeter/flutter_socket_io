@@ -1,3 +1,6 @@
+## 0.3.2
+* Fixed bugs.
+
 ## 0.3.0
 * Supported iOS (Testing).
 
