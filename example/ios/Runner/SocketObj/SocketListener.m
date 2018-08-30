@@ -12,10 +12,12 @@
 
 + (instancetype)initSocketListener:(FlutterMethodChannel *)methodChannel
                              event:(NSString *)event
+                          socketId:(NSString *)socketId
                           callBack:(NSString *)callBack {
     SocketListener *obj = [[SocketListener alloc] init];
     obj.methodChannel = methodChannel;
     obj.event = event;
+    obj.socketId = socketId;
     obj.callBack = callBack;
     return obj;
 }
@@ -28,7 +30,7 @@
     if (self.event && self.callBack && self.methodChannel && arg) {
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:arg options:NSJSONWritingPrettyPrinted error:nil];
         NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-        [self.methodChannel invokeMethod:[NSString stringWithFormat:@"%@|%@", self.event, self.callBack] arguments:jsonString];
+        [self.methodChannel invokeMethod:[NSString stringWithFormat:@"%@|%@|%@", self.socketId, self.event, self.callBack] arguments:jsonString];
     }
 }
 

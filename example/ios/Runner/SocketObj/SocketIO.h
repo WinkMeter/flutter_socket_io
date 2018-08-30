@@ -43,5 +43,6 @@
 - (BOOL)isConnected;
 - (void)disconnect;
 - (void)destroy;
+- (void)onSocketCallback:(NSString *)status obj:(id)arg;
 
 @end

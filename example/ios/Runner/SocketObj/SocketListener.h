@@ -13,10 +13,12 @@
 
 @property (nonatomic, strong) FlutterMethodChannel *methodChannel;
 @property (nonatomic, strong) NSString *event;
+@property (nonatomic, strong) NSString *socketId;
 @property (nonatomic, strong) NSString *callBack;
 
 + (instancetype)initSocketListener:(FlutterMethodChannel *)methodChannel
                              event:(NSString *)event
+                          socketId:(NSString *)socketId
                           callBack:(NSString *)callBack;
 
 - (NSString *)getCallback;

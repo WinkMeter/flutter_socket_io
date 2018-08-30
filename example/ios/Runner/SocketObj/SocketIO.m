@@ -85,65 +85,47 @@
         weakify(self);
         [self.socket on:EVENT_CONNECT callback:^(NSArray* data, SocketAckEmitter* ack) {
             strongify(weakSelf);
-            if (strongSelf.methodChannel && strongSelf.statusCallback) {
-                [strongSelf.methodChannel invokeMethod:strongSelf.statusCallback arguments:EVENT_CONNECT];
-            }
+            [strongSelf onSocketCallback:EVENT_CONNECT obj:ack];
         }];
         
         [self.socket on:EVENT_RECONNECT callback:^(NSArray* data, SocketAckEmitter* ack) {
             strongify(weakSelf);
-            if (strongSelf.methodChannel && strongSelf.statusCallback) {
-                [strongSelf.methodChannel invokeMethod:strongSelf.statusCallback arguments:EVENT_RECONNECT];
-            }
+            [strongSelf onSocketCallback:EVENT_RECONNECT obj:ack];
         }];
         
         [self.socket on:EVENT_RECONNECTING callback:^(NSArray* data, SocketAckEmitter* ack) {
             strongify(weakSelf);
-            if (strongSelf.methodChannel && strongSelf.statusCallback) {
-                [strongSelf.methodChannel invokeMethod:strongSelf.statusCallback arguments:EVENT_RECONNECTING];
-            }
+            [strongSelf onSocketCallback:EVENT_RECONNECTING obj:ack];
         }];
         
         [self.socket on:EVENT_RECONNECT_ATTEMPT callback:^(NSArray* data, SocketAckEmitter* ack) {
             strongify(weakSelf);
-            if (strongSelf.methodChannel && strongSelf.statusCallback) {
-                [strongSelf.methodChannel invokeMethod:strongSelf.statusCallback arguments:EVENT_RECONNECT_ATTEMPT];
-            }
+            [strongSelf onSocketCallback:EVENT_RECONNECT_ATTEMPT obj:ack];
         }];
         
         [self.socket on:EVENT_RECONNECT_FAILED callback:^(NSArray* data, SocketAckEmitter* ack) {
             strongify(weakSelf);
-            if (strongSelf.methodChannel && strongSelf.statusCallback) {
-                [strongSelf.methodChannel invokeMethod:strongSelf.statusCallback arguments:EVENT_RECONNECT_FAILED];
-            }
+            [strongSelf onSocketCallback:EVENT_RECONNECT_FAILED obj:ack];
         }];
         
         [self.socket on:EVENT_RECONNECT_ERROR callback:^(NSArray* data, SocketAckEmitter* ack) {
             strongify(weakSelf);
-            if (strongSelf.methodChannel && strongSelf.statusCallback) {
-                [strongSelf.methodChannel invokeMethod:strongSelf.statusCallback arguments:EVENT_RECONNECT_ERROR];
-            }
+            [strongSelf onSocketCallback:EVENT_RECONNECT_ERROR obj:ack];
         }];
         
         [self.socket on:EVENT_CONNECT_TIMEOUT callback:^(NSArray* data, SocketAckEmitter* ack) {
             strongify(weakSelf);
-            if (strongSelf.methodChannel && strongSelf.statusCallback) {
-                [strongSelf.methodChannel invokeMethod:strongSelf.statusCallback arguments:EVENT_CONNECT_TIMEOUT];
-            }
+            [strongSelf onSocketCallback:EVENT_CONNECT_TIMEOUT obj:ack];
         }];
         
         [self.socket on:EVENT_DISCONNECT callback:^(NSArray* data, SocketAckEmitter* ack) {
             strongify(weakSelf);
-            if (strongSelf.methodChannel && strongSelf.statusCallback) {
-                [strongSelf.methodChannel invokeMethod:strongSelf.statusCallback arguments:EVENT_DISCONNECT];
-            }
+            [strongSelf onSocketCallback:EVENT_DISCONNECT obj:ack];
         }];
         
         [self.socket on:EVENT_CONNECT_ERROR callback:^(NSArray* data, SocketAckEmitter* ack) {
             strongify(weakSelf);
-            if (strongSelf.methodChannel && strongSelf.statusCallback) {
-                [strongSelf.methodChannel invokeMethod:strongSelf.statusCallback arguments:EVENT_CONNECT_ERROR];
-            }
+            [strongSelf onSocketCallback:EVENT_CONNECT_ERROR obj:ack];
         }];
         
         [self.socket on:@"socket_info" callback:^(NSArray* data, SocketAckEmitter* ack) {
@@ -175,12 +157,15 @@
 
 - (void)sendMessage:(NSString *)eventName mess:(NSString *)message callBack:(NSString *)callBack {
     if ([self isConnected] && eventName && message) {
-        SocketListener *listener = [SocketListener initSocketListener:self.methodChannel event:eventName callBack:callBack];
+        NSLog(@"SEND MESSAGE EVENT %@ MESSAGE %@", eventName, message);
+        SocketListener *listener = [SocketListener initSocketListener:self.methodChannel event:eventName socketId:[self getId] callBack:callBack];
         NSArray *jsonObject = [NSJSONSerialization JSONObjectWithData:[message dataUsingEncoding:NSUTF8StringEncoding]
                                                               options:0 error:NULL];
         [[self.socket emitWithAck:eventName with:@[jsonObject]] timingOutAfter:0 callback:^(NSArray* data) {
             [listener call:data];
         }];
+    } else {
+        NSLog(@"INVALID PARAMS : event or message is NULL or EMPTY!");
     }
 }
 
@@ -191,7 +176,7 @@
             listeners = [[NSMutableArray alloc] init];
         }
         
-        SocketListener *listener = [SocketListener initSocketListener:self.methodChannel event:eventName callBack:callBack];
+        SocketListener *listener = [SocketListener initSocketListener:self.methodChannel event:eventName socketId:[self getId] callBack:callBack];
         if (callBack && [UtilsSocket isExistedCallback:listeners callBack:callBack]) {
             [listeners addObject:listener];
         }
@@ -265,6 +250,15 @@
     if (self.socket && self.manager) {
         [self.socket disconnect];
         [self.manager disconnect];
+    }
+}
+
+- (void)onSocketCallback:(NSString *)status obj:(id)arg {
+    if (self.methodChannel && self.statusCallback) {
+        [self.methodChannel invokeMethod:[NSString stringWithFormat:@"%@|%@|%@", [self getId], self.statusCallback, self.statusCallback] arguments:status];
+    }
+    if (arg) {
+        NSLog(@"onSocketCallback %@", self.statusCallback);
     }
 }
 
