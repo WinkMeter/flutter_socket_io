@@ -1,3 +1,6 @@
+## 0.3.3
+* Fixed bugs: iOS don't create new SocketManger (with the same domain) if it already existed.
+
 ## 0.3.2
 * Fixed bugs.
 
