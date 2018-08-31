@@ -79,9 +79,11 @@
     }
     @try {
         NSURL *url = [NSURL URLWithString:self.domain];
-        self.manager = [[SocketManager alloc] initWithSocketURL:url config:@{@"log": @YES, @"compress": @YES, @"connectParams": self.query, @"forceWebsockets": @YES }];
-        self.socket = self.manager.defaultSocket;
-        self.socket = [self.manager socketForNamespace:self.nameSpace];
+        if (!manager) {
+            manager = [[SocketManager alloc] initWithSocketURL:url config:@{@"log": @YES, @"compress": @YES, @"connectParams": self.query, @"forceWebsockets": @YES }];
+        }
+        self.socket = manager.defaultSocket;
+        self.socket = [manager socketForNamespace:self.nameSpace];
         weakify(self);
         [self.socket on:EVENT_CONNECT callback:^(NSArray* data, SocketAckEmitter* ack) {
             strongify(weakSelf);
@@ -135,7 +137,7 @@
     } @catch (NSException *exception) {
         NSLog(@"CONNECT FAIL : %@", exception.description);
         if (self.methodChannel && self.statusCallback) {
-            [self.methodChannel invokeMethod:self.statusCallback arguments:@"failed"];
+            [self onSocketCallback:self.statusCallback obj:@"failed"];
         }
     }
     
@@ -170,7 +172,7 @@
 }
 
 - (void)subscribe:(NSString *)eventName callBack:(NSString *)callBack {
-    if (self.socket && self.manager && eventName) {
+    if (self.socket && manager && eventName) {
         NSMutableArray *listeners = [self.subscribes objectForKey:eventName];
         if (!listeners) {
             listeners = [[NSMutableArray alloc] init];
@@ -189,7 +191,7 @@
 }
 
 - (void)subscribeList:(NSMutableDictionary *)sub {
-    if (self.socket && self.manager && ![UtilsSocket isNullOrEmpty:sub]) {
+    if (self.socket && manager && ![UtilsSocket isNullOrEmpty:sub]) {
         NSArray *keys = [sub allKeys];
         for (id key in keys) {
             [self subscribe:key callBack:[sub objectForKey:key]];
@@ -198,7 +200,7 @@
 }
 
 - (void)unSubscribe:(NSString *)eventName callBack:(NSString *)callBack {
-    if (self.socket && self.manager && ![UtilsSocket isNullOrEmpty:self.subscribes]) {
+    if (self.socket && manager && ![UtilsSocket isNullOrEmpty:self.subscribes]) {
         NSMutableArray *listeners = [self.subscribes objectForKey:eventName];
         if ([UtilsSocket isNullOrEmptyArray:listeners]) {
             [self.subscribes removeObjectForKey:eventName];
@@ -220,7 +222,7 @@
 }
 
 - (void)unSubscribeList:(NSMutableDictionary *)sub {
-    if (self.socket && self.manager && ![UtilsSocket isNullOrEmpty:sub]) {
+    if (self.socket && manager && ![UtilsSocket isNullOrEmpty:sub]) {
         NSArray *keys = [sub allKeys];
         for (id key in keys) {
             [self unSubscribe:key callBack:[sub objectForKey:key]];
@@ -229,7 +231,7 @@
 }
 
 - (void)unSubscribeAll {
-    if (self.socket && self.manager && ![UtilsSocket isNullOrEmpty:self.subscribes]) {
+    if (self.socket && manager && ![UtilsSocket isNullOrEmpty:self.subscribes]) {
         NSArray *keys = [self.subscribes allKeys];
         for (id key in keys) {
             [self unSubscribe:key callBack:nil];
@@ -238,7 +240,7 @@
 }
 
 - (BOOL)isConnected {
-    if (self.socket && self.manager) {
+    if (self.socket && manager) {
         if (self.socket.status == SocketIOStatusConnected) {
             return YES;
         }
@@ -247,9 +249,9 @@
 }
 
 - (void)disconnect {
-    if (self.socket && self.manager) {
+    if (self.socket && manager) {
         [self.socket disconnect];
-        [self.manager disconnect];
+        [manager disconnect];
     }
 }
 
@@ -267,7 +269,7 @@
     [self unSubscribeAll];
     [self removeChannelAll];
     self.socket = nil;
-    self.manager = nil;
+    manager = nil;
     self.methodChannel = nil;
     self.nameSpace = nil;
     self.domain = nil;

@@ -12,6 +12,8 @@
 @import Flutter;
 @import SocketIO;
 
+static SocketManager *manager;
+
 @interface SocketIO : NSObject
 
 @property (nonatomic, strong) FlutterMethodChannel *methodChannel;
@@ -21,7 +23,6 @@
 @property (nonatomic, strong) NSString *statusCallback;
 @property (nonatomic, strong) NSMutableDictionary *subscribes;
 @property (nonatomic, strong) SocketIOClient *socket;
-@property (nonatomic, strong) SocketManager *manager;
 
 + (instancetype)initSocketIO:(FlutterMethodChannel *)methodChannel
                        query:(NSDictionary *)query
