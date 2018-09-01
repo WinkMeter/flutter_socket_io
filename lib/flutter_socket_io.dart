@@ -44,6 +44,7 @@ class SocketIO {
          }
        }
     }
+    return null;
   }
 
   _clearAll() {

@@ -33,6 +33,7 @@ class SocketIOManager {
         }
       }
     }
+    return null;
   }
 
   String _getSocketId(String domain, String namespace) {
