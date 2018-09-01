@@ -1,4 +1,4 @@
-## 0.3.4
+## 0.3.7
 * Updated documentation
 
 ## 0.3.3

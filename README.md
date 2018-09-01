@@ -1,81 +1,87 @@
 # flutter_socket_io  
   
-Flutter Socket IO Plugin, supported Android + iOS
+Flutter Socket IO Plugin, supported Android + iOS (iOS installation guide is coming soon)
   
 ## Use the plugin
 	
 
- **1. Add the following import to your Dart code:**
-	import  'package:flutter_socket_io/flutter_socket_io.dart';
+**1. Add the following import to your Dart code:**
+~~~
+import  'package:flutter_socket_io/flutter_socket_io.dart';
+~~~
 	
- **2. SocketIOManager**: to manage (create/destroy) list of SocketIO 
->Create SocketIO with SocketIOManager*: 
+**2. SocketIOManager**: to manage (create/destroy) list of SocketIO 
+
+*Create SocketIO with SocketIOManager*: 
 	
+~~~
 SocketIO socketIO = SocketIOManager().createSocketIO("http://127.0.0.1:3000", "/chat", query: "userId=21031", socketStatusCallback: _socketStatus);  
+~~~
 
-
->Destroy SocketIO with socketIOManager:
+Destroy SocketIO with socketIOManager:
 		
+~~~
 SocketIOManager().destroySocket(socketIO);  
+~~~
     
 **3. SocketIO**:
->*Get Id (Url + Namespace) of the socket*
-  
 
-    String getId();
+*Get Id (Url + Namespace) of the socket*
+~~~
+String getId();
+~~~
+</br>
+</br>
 
-  
-<hr>
+*Create a new socket and connects the client*
+~~~
+Future<void> connect();
+~~~
+</br>
+</br>
 
->Create a new socket and connects the client
+*Init socket before doing anything with socket*  
+~~~
+Future<void> init();
+~~~
+</br>
+</br>
 
-    Future<void> connect();
+*Subscribe to a channel with a callback*  
+ ~~~
+ Future<void> subscribe(String event, Function callback); 
+~~~
+</br>
+</br>
 
-<hr>    
-
->Init socket before doing anything with socket  
-  
-
-    Future<void> init();
-
- <hr>
-    
- >Subscribe to a channel with a callback  
+*Unsubscribe from a channel. When no callback is provided, unsubscribe all subscribers of the channel. Otherwise, unsubscribe only the callback passed in*  
  
- 
+~~~
+Future<void> unSubscribe(String event, [Function callback]); 
+~~~
+</br>
+</br>
 
-    Future<void> subscribe(String event, Function callback); 
+*Send a message via a channel (i.e. event, *the native code will convert string message to JsonObject before sending*)*  
+~~~
+Future<void> sendMessage(String event, dynamic message, [Function callback]);
+~~~
+</br>
+</br>
 
- 
- <hr>
-    
- > Unsubscribe from a channel. When no callback is provided, unsubscribe all subscribers of the channel. Otherwise, unsubscribe only the callback passed in  
- 
- 
+*Disconnect from the socket*  
+~~~
+Future<void> disconnect(); 
+~~~
+</br>
+</br>
 
-    Future<void> unSubscribe(String event, [Function callback]); 
-
- 
-<hr>
-
->Send a message via a channel (i.e. event, *the native code will convert string message to JsonObject before sending*)  
-
-    Future<void> sendMessage(String event, dynamic message, [Function callback]);
-
-  
-<hr>
-
->Disconnect from the socket  
-
-    Future<void> disconnect(); 
-
- 
-<hr>
-
->Unsubscribe all subscribers from all channels  
-  
-
-    Future<void> unSubscribesAll();
+*Unsubscribe all subscribers from all channels*  
+~~~
+Future<void> unSubscribesAll();
+~~~
+</br>
+</br>
 
 **4. Example:**
 [Link](https://pub.dartlang.org/packages/flutter_socket_io#-example-tab-)
