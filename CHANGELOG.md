@@ -1,3 +1,7 @@
+## 0.4.0
+* Added: The guide for installing this plugin on iOS 
+* Added: MIT LICENSE
+
 ## 0.3.8
 * Fixed bugs.
 
