@@ -1,3 +1,6 @@
+## 0.4.1
+* Changed: changed android dependency from "com.github.nkzawa:socket.io-client:0.3.0" to official socket.io "io.socket:socket.io-client:1.0.0"
+
 ## 0.4.0
 * Added: The guide for installing this plugin on iOS 
 * Added: MIT LICENSE

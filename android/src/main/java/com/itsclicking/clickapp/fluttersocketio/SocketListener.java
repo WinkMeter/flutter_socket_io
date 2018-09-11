@@ -1,8 +1,7 @@
 package com.itsclicking.clickapp.fluttersocketio;
 
-import com.github.nkzawa.emitter.Emitter;
-
 import io.flutter.plugin.common.MethodChannel;
+import io.socket.emitter.Emitter;
 
 public class SocketListener implements Emitter.Listener {
 
