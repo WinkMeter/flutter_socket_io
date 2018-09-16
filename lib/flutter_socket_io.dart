@@ -62,7 +62,11 @@ class SocketIO {
   }
 
   /// Init socket before doing anything with socket
-  Future<void> init() async {
+  Future<void> init({String query}) async {
+    if (query != null) {
+      _query = query;
+    }
+
     await _channel.invokeMethod(MethodCallName.SOCKET_INIT, {
       MethodCallArgumentsName.SOCKET_DOMAIN: _domain,
       MethodCallArgumentsName.SOCKET_NAME_SPACE: _namespace,

@@ -90,6 +90,7 @@ public class SocketIO {
         try {
             mOptions = new IO.Options();
             mOptions.transports = new String[]{WebSocket.NAME};
+            mOptions.forceNew = true;
 
             if(!Utils.isNullOrEmpty(_query)) {
                 Utils.log(TAG, "query: " + _query);
