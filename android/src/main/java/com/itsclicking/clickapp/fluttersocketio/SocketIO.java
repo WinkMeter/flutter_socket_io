@@ -1,10 +1,5 @@
 package com.itsclicking.clickapp.fluttersocketio;
 
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.engineio.client.transports.WebSocket;
-import com.github.nkzawa.socketio.client.Ack;
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -17,6 +12,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
 import io.flutter.plugin.common.MethodChannel;
+import io.socket.client.Ack;
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
+import io.socket.engineio.client.transports.WebSocket;
 
 public class SocketIO {
 
@@ -102,71 +102,52 @@ public class SocketIO {
             Utils.log(TAG, "connecting...");
 
             //start listen connection events
-
             _socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     onSocketCallback(Socket.EVENT_CONNECT, args);
                 }
-            });
-
-            _socket.on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
+            }).on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     onSocketCallback(Socket.EVENT_RECONNECT, args);
                 }
-            });
-
-            _socket.on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
+            }).on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     onSocketCallback(Socket.EVENT_RECONNECTING, args);
                 }
-            });
-
-            _socket.on(Socket.EVENT_RECONNECT_ATTEMPT, new Emitter.Listener() {
+            }).on(Socket.EVENT_RECONNECT_ATTEMPT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     onSocketCallback(Socket.EVENT_RECONNECT_ATTEMPT, args);
                 }
-            });
-
-            _socket.on(Socket.EVENT_RECONNECT_FAILED, new Emitter.Listener() {
+            }).on(Socket.EVENT_RECONNECT_FAILED, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     onSocketCallback(Socket.EVENT_RECONNECT_FAILED, args);
                 }
-            });
-
-            _socket.on(Socket.EVENT_RECONNECT_ERROR, new Emitter.Listener() {
+            }).on(Socket.EVENT_RECONNECT_ERROR, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     onSocketCallback(Socket.EVENT_RECONNECT_ERROR, args);
                 }
-            });
-
-            //listen connect timeout event
-            _socket.on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
+            }).on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     onSocketCallback(Socket.EVENT_CONNECT_TIMEOUT, args);
                 }
-            });
-
-            _socket.on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     onSocketCallback(Socket.EVENT_DISCONNECT, args);
                 }
-            });
-
-            _socket.on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
+            }).on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
                     onSocketCallback(Socket.EVENT_CONNECT_ERROR, args);
                 }
             });
-
             //end listen connection events
         } catch (URISyntaxException e) {
             Utils.log(TAG, "connect fail : " + e.toString());

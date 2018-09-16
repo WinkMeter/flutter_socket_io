@@ -104,7 +104,8 @@ _connectSocket01() {
 	//update your domain before using  
 	 socketIO = SocketIOManager().createSocketIO("http://127.0.0.1:3000", "/chat", query: "userId=21031", socketStatusCallback: _socketStatus); 
 
-	//call init socket before doing anything socketIO.init(); 
+	//call init socket before doing anything 
+	socketIO.init(); 
 
 	//subscribe event
 	socketIO.subscribe("socket_info", _onSocketInfo); 
