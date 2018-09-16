@@ -26,7 +26,11 @@ public class SocketListener implements Emitter.Listener {
     public void call(Object... args) {
         if (args != null && _methodChannel != null && !Utils.isNullOrEmpty(_event)
                 && !Utils.isNullOrEmpty(_callback)) {
-            _methodChannel.invokeMethod(_socketId + "|" +_event + "|" + _callback, args[0].toString());
+            String data = "";
+            if (args[0] != null) {
+                data = args[0].toString();
+            }
+            _methodChannel.invokeMethod(_socketId + "|" +_event + "|" + _callback, data);
         }
     }
 }
