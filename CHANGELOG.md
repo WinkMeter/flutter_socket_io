@@ -1,3 +1,7 @@
+## 0.4.3
+* Changed: - init with query option
+* Fixed bug: - added forceNew to create socket instance
+
 ## 0.4.2
 * Fixed bug: checked NULL data received before calling back when using sendMessage function* Fixed bug: checked NULL data received from server before calling back when using sendMessage function
 
