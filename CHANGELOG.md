@@ -1,3 +1,6 @@
+## 0.4.2
+* Fixed bug: checked NULL data received before calling back when using sendMessage function* Fixed bug: checked NULL data received from server before calling back when using sendMessage function
+
 ## 0.4.1
 * Changed: changed android dependency from "com.github.nkzawa:socket.io-client:0.3.0" to official socket.io "io.socket:socket.io-client:1.0.0"
 
