@@ -1,20 +1,27 @@
 package com.itsclicking.clickapp.fluttersocketio;
 
+import android.net.Uri;
+
 import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
 
 import io.flutter.plugin.common.MethodChannel;
 import io.socket.client.Ack;
 import io.socket.client.IO;
+import io.socket.client.Manager;
 import io.socket.client.Socket;
+import io.socket.client.Url;
 import io.socket.emitter.Emitter;
 import io.socket.engineio.client.transports.WebSocket;
 
@@ -30,6 +37,7 @@ public class SocketIO {
     private Socket _socket;
     private IO.Options mOptions;
     private ConcurrentMap<String, ConcurrentLinkedQueue<SocketListener>> _subscribes;
+    private static final ConcurrentHashMap<String, Manager> managers = new ConcurrentHashMap<String, Manager>();
 
     public SocketIO(MethodChannel methodChannel, String domain,
                     String namespace, String query, String statusCallback) {
@@ -67,6 +75,43 @@ public class SocketIO {
         }
     }
 
+    private Socket getSocket() {
+        URI source;
+        URL parsed;
+
+        try {
+            URI uri = new URI(getSocketUrl());
+            parsed = Url.parse(uri);
+            source = parsed.toURI();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        mOptions = new IO.Options();
+        mOptions.transports = new String[]{WebSocket.NAME};
+
+        if(!Utils.isNullOrEmpty(_query)) {
+            Utils.log(TAG, "query: " + _query);
+            mOptions.query = _query;
+        }
+
+        String id = Url.extractId(parsed);
+        boolean newConnection = !managers.containsKey(id);
+        Manager io;
+
+        if (newConnection) {
+            io = new Manager(source, mOptions);
+            managers.putIfAbsent(id, io);
+        } else {
+            if (!managers.containsKey(id)) {
+                managers.putIfAbsent(id, new Manager(source, mOptions));
+            }
+            io = managers.get(id);
+        }
+
+        return io.socket(_namespace, mOptions);
+    }
+
     public String getId() {
         return getSocketUrl();
     }
@@ -87,75 +132,59 @@ public class SocketIO {
             }
             _socket = null;
         }
-        try {
-            mOptions = new IO.Options();
-            mOptions.transports = new String[]{WebSocket.NAME};
-            mOptions.forceNew = true;
 
-            if(!Utils.isNullOrEmpty(_query)) {
-                Utils.log(TAG, "query: " + _query);
-                mOptions.query = _query;
+        _socket = getSocket();
+
+        Utils.log(TAG, "connecting..." + _socket.id());
+
+        //start listen connection events
+        _socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                onSocketCallback(Socket.EVENT_CONNECT, args);
             }
-
-            //init socket
-            _socket = (mOptions == null ? IO.socket(getSocketUrl()) : IO.socket(getSocketUrl(), mOptions));
-
-            Utils.log(TAG, "connecting...");
-
-            //start listen connection events
-            _socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    onSocketCallback(Socket.EVENT_CONNECT, args);
-                }
-            }).on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    onSocketCallback(Socket.EVENT_RECONNECT, args);
-                }
-            }).on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    onSocketCallback(Socket.EVENT_RECONNECTING, args);
-                }
-            }).on(Socket.EVENT_RECONNECT_ATTEMPT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    onSocketCallback(Socket.EVENT_RECONNECT_ATTEMPT, args);
-                }
-            }).on(Socket.EVENT_RECONNECT_FAILED, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    onSocketCallback(Socket.EVENT_RECONNECT_FAILED, args);
-                }
-            }).on(Socket.EVENT_RECONNECT_ERROR, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    onSocketCallback(Socket.EVENT_RECONNECT_ERROR, args);
-                }
-            }).on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    onSocketCallback(Socket.EVENT_CONNECT_TIMEOUT, args);
-                }
-            }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    onSocketCallback(Socket.EVENT_DISCONNECT, args);
-                }
-            }).on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    onSocketCallback(Socket.EVENT_CONNECT_ERROR, args);
-                }
-            });
-            //end listen connection events
-        } catch (URISyntaxException e) {
-            Utils.log(TAG, "connect fail : " + e.toString());
-            if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
-                _methodChannel.invokeMethod(_statusCallback, "failed");
+        }).on(Socket.EVENT_RECONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                onSocketCallback(Socket.EVENT_RECONNECT, args);
             }
-        }
+        }).on(Socket.EVENT_RECONNECTING, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                onSocketCallback(Socket.EVENT_RECONNECTING, args);
+            }
+        }).on(Socket.EVENT_RECONNECT_ATTEMPT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                onSocketCallback(Socket.EVENT_RECONNECT_ATTEMPT, args);
+            }
+        }).on(Socket.EVENT_RECONNECT_FAILED, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                onSocketCallback(Socket.EVENT_RECONNECT_FAILED, args);
+            }
+        }).on(Socket.EVENT_RECONNECT_ERROR, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                onSocketCallback(Socket.EVENT_RECONNECT_ERROR, args);
+            }
+        }).on(Socket.EVENT_CONNECT_TIMEOUT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                onSocketCallback(Socket.EVENT_CONNECT_TIMEOUT, args);
+            }
+        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                onSocketCallback(Socket.EVENT_DISCONNECT, args);
+            }
+        }).on(Socket.EVENT_CONNECT_ERROR, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                onSocketCallback(Socket.EVENT_CONNECT_ERROR, args);
+            }
+        });
+        //end listen connection events
     }
 
     public void connect() {
