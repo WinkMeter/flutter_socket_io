@@ -1,3 +1,6 @@
+## 0.4.6
+- Fixed bugs: get hashCode function is always equal 1.
+
 ## 0.4.3
 * Changed: - init with query option
 * Fixed bug: - added forceNew to create socket instance
