@@ -1,3 +1,6 @@
+## 0.4.6
+- Fixed bugs: get hashCode of Function is always equal 1 when build release iOS
+
 ## 0.4.3
 * Changed: - init with query option
 * Fixed bug: - added forceNew to create socket instance
