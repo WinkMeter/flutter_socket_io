@@ -29,20 +29,20 @@ class SocketIO {
   }
 
   Future<dynamic> handlerMethodCall(String event, String callbackFuncName, dynamic arguments) {
-     if (event != null && event.isNotEmpty) {
-       if (event == _statusCallbackName && _statusCallback != null) {
-         _statusCallback(arguments);
-       } else {
-         CallbackFunctions functions = _callbacks[event];
-         if (functions != null) {
-           SocketIOFunction f = functions.getFunctionByName(callbackFuncName);
-           if (f != null && f.function != null) {
-             print("CALLLING FUNCTION: " + f.functionName);
-             f.function(arguments);
-             return null;
-           }
-         }
-       }
+    if (event != null && event.isNotEmpty) {
+      if (event == _statusCallbackName && _statusCallback != null) {
+        _statusCallback(arguments);
+      } else {
+        CallbackFunctions functions = _callbacks[event];
+        if (functions != null) {
+          SocketIOFunction f = functions.getFunctionByName(callbackFuncName);
+          if (f != null && f.function != null) {
+            print("CALLLING FUNCTION: " + f.functionName);
+            f.function(arguments);
+            return null;
+          }
+        }
+      }
     }
     return null;
   }
@@ -195,7 +195,7 @@ class SocketIO {
   }
 }
 
-String _parserFunctionName(Function function) {
+String _parserFunctionName(Object function) {
   if (function != null) {
     return "FunctionId@${function.hashCode}";
   }
