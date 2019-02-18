@@ -27,7 +27,7 @@ import  'package:flutter_socket_io/flutter_socket_io.dart';
 *Create SocketIO with SocketIOManager*: 
 	
 ~~~
-SocketIO socketIO = SocketIOManager().createSocketIO("http://127.0.0.1:3000", "/chat", query: "userId=21031", socketStatusCallback: _socketStatus);  
+SocketIO socketIO = SocketIOManager().createSocketIO(domain:"http://127.0.0.1:3000", namespace: w"/chat", query: "userId=21031", socketStatusCallback: _socketStatus);  
 ~~~
 
 Destroy SocketIO with socketIOManager:
@@ -102,7 +102,7 @@ Future<void> unSubscribesAll();
 SocketIO socketIO;
 _connectSocket01() { 
 	//update your domain before using  
-	 socketIO = SocketIOManager().createSocketIO("http://127.0.0.1:3000", "/chat", query: "userId=21031", socketStatusCallback: _socketStatus); 
+	 socketIO = SocketIOManager().createSocketIO(domain: "http://127.0.0.1:3000", namespace: "/chat", query: "userId=21031", socketStatusCallback: _socketStatus); 
 
 	//call init socket before doing anything 
 	socketIO.init(); 
