@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_socket_io/flutter_socket_io.dart';
+import 'package:meta/meta.dart';
 
 class SocketIOManager {
 
@@ -11,7 +12,7 @@ class SocketIOManager {
   Map<String, SocketIO> _sockets;
 
   factory SocketIOManager() {
-   return _instance;
+    return _instance;
   }
 
   SocketIOManager._internal() {
@@ -57,8 +58,12 @@ class SocketIOManager {
     return null;
   }
 
-  SocketIO createSocketIO(String domain, String namespace, {String query, Function socketStatusCallback}) {
-    if(domain == null || domain.isEmpty) {
+  SocketIO createSocketIO(
+      {@required String domain,
+      String namespace = "/",
+      String query,
+      Function socketStatusCallback})  {
+      if (domain == null || domain.isEmpty) {
       print("DOMAIN IS NULL OR EMPTY!");
       return null;
     }

@@ -1,3 +1,6 @@
+## 0.5.0
+* Changed: - new init with optional and required parameters
+
 ## 0.4.3
 * Changed: - init with query option
 * Fixed bug: - added forceNew to create socket instance
