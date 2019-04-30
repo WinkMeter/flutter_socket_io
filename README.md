@@ -27,6 +27,7 @@ import  'package:flutter_socket_io/flutter_socket_io.dart';
 *Create SocketIO with SocketIOManager*: 
 	
 ~~~
+import 'package:flutter_socket_io/socket_io_manager.dart';
 SocketIO socketIO = SocketIOManager().createSocketIO("http://127.0.0.1:3000", "/chat", query: "userId=21031", socketStatusCallback: _socketStatus);  
 ~~~
 
