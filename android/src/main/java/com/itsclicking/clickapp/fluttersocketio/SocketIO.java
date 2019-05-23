@@ -1,7 +1,5 @@
 package com.itsclicking.clickapp.fluttersocketio;
 
-import android.net.Uri;
-
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -14,7 +12,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.logging.Level;
 
 import io.flutter.plugin.common.MethodChannel;
 import io.socket.client.Ack;

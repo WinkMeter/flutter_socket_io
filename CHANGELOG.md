@@ -1,3 +1,6 @@
+## 0.4.7
+- Upgraded android build configs.
+
 ## 0.4.6
 - Fixed bugs: get hashCode function is always equal 1.
 
