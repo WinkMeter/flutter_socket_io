@@ -23,7 +23,7 @@ public class SocketIOManager implements ISocketIOManager {
         mSockets = new HashMap<>();
     }
 
-    private SocketIO getSocket(String socketId) {
+    public SocketIO getSocket(String socketId) {
         if(mSockets != null && !Utils.isNullOrEmpty(socketId)) {
             Utils.log("TOTAL SOCKETS: ", String.valueOf(mSockets.size()));
             return mSockets.get(socketId);
@@ -58,7 +58,7 @@ public class SocketIOManager implements ISocketIOManager {
         return socketIO != null && socketIO.isConnected();
     }
 
-    private String getSocketId(String domain, String namespace) {
+    public String getSocketId(String domain, String namespace) {
         if(!Utils.isNullOrEmpty(domain)) {
             return domain + (namespace != null ? namespace : "");
         }
