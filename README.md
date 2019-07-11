@@ -100,27 +100,27 @@ Future<void> unSubscribesAll();
   
 ~~~~
 SocketIO socketIO;
-_connectSocket01() { 
+_connectSocket01() async { 
 	//update your domain before using  
 	 socketIO = SocketIOManager().createSocketIO("http://127.0.0.1:3000", "/chat", query: "userId=21031", socketStatusCallback: _socketStatus); 
 
 	//call init socket before doing anything 
-	socketIO.init(); 
+	await socketIO.init(); 
 
 	//subscribe event
-	socketIO.subscribe("socket_info", _onSocketInfo); 
+	await socketIO.subscribe("socket_info", _onSocketInfo); 
 
 	//connect socket 
-	socketIO.connect(); 
+	await socketIO.connect(); 
 }
 
 _socketStatus(dynamic data) { 
 	print("Socket status: " + data); 
 }
 
-_subscribes() { 
+_subscribes() async { 
 	if (socketIO != null) { 
-		socketIO.subscribe("chat_direct", _onReceiveChatMessage); 
+		await socketIO.subscribe("chat_direct", _onReceiveChatMessage); 
 	} 
 }
 
@@ -130,14 +130,14 @@ void _onReceiveChatMessage(dynamic message) {
 
 void _sendChatMessage(String msg) async { 
 	if (socketIO != null) { 
-		String jsonData = '{"message":{"type":"Text","content": ${(msg != null && msg.isNotEmpty) ? '"${msg}"' : '"Hello SOCKET IO PLUGIN :))"'},"owner":"589f10b9bbcd694aa570988d","avatar":"img/avatar-default.png"},"sender":{"userId":"589f10b9bbcd694aa570988d","first":"Ha","last":"Test 2","location":{"lat":10.792273999999999,"long":106.6430356,"accuracy":38,"regionId":null,"vendor":"gps","verticalAccuracy":null},"name":"Ha Test 2"},"receivers":["587e1147744c6260e2d3a4af"],"conversationId":"589f116612aa254aa4fef79f","name":null,"isAnonymous":null}'; 
-		socketIO.sendMessage("chat_direct", jsonData, _onReceiveChatMessage); 
+		String jsonData = '{"message":{"type":"Text","content": ${(msg != null && msg.isNotEmpty) ? '"$msg"' : '"Hello SOCKET IO PLUGIN :))"'},"owner":"589f10b9bbcd694aa570988d","avatar":"img/avatar-default.png"},"sender":{"userId":"589f10b9bbcd694aa570988d","first":"Ha","last":"Test 2","location":{"lat":10.792273999999999,"long":106.6430356,"accuracy":38,"regionId":null,"vendor":"gps","verticalAccuracy":null},"name":"Ha Test 2"},"receivers":["587e1147744c6260e2d3a4af"],"conversationId":"589f116612aa254aa4fef79f","name":null,"isAnonymous":null}'; 
+		await socketIO.sendMessage("chat_direct", jsonData, _onReceiveChatMessage); 
 	}
  }
 
-_destroySocket() { 
+_destroySocket() async { 
 	if (socketIO != null) { 
-		SocketIOManager().destroySocket(socketIO); 
+		await SocketIOManager().destroySocket(socketIO); 
 	} 
 }
 
