@@ -55,33 +55,33 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  _connectSocket01() {
+  _connectSocket01() async {
     //update your domain before using
     /*socketIO = new SocketIO("http://127.0.0.1:3000", "/chat",
         query: "userId=21031", socketStatusCallback: _socketStatus);*/
     socketIO = SocketIOManager().createSocketIO("http://127.0.0.1:3000", "/chat", query: "userId=21031", socketStatusCallback: _socketStatus);
 
     //call init socket before doing anything
-    socketIO.init();
+    await socketIO.init();
 
     //subscribe event
-    socketIO.subscribe("socket_info", _onSocketInfo);
+    await socketIO.subscribe("socket_info", _onSocketInfo);
 
     //connect socket
-    socketIO.connect();
+    await socketIO.connect();
   }
 
-  _connectSocket02() {
+  _connectSocket02() async {
     socketIO02 = SocketIOManager().createSocketIO("http://127.0.0.1:3000", "/map", query: "userId=21031", socketStatusCallback: _socketStatus02);
 
     //call init socket before doing anything
-    socketIO02.init();
+    await socketIO02.init();
 
     //subscribe event
-    socketIO02.subscribe("socket_info", _onSocketInfo02);
+    await socketIO02.subscribe("socket_info", _onSocketInfo02);
 
     //connect socket
-    socketIO02.connect();
+    await socketIO02.connect();
   }
 
   _onSocketInfo(dynamic data) {
@@ -100,35 +100,35 @@ class _MyHomePageState extends State<MyHomePage> {
     print("Socket 02 status: " + data);
   }
 
-  _subscribes() {
+  _subscribes() async {
     if (socketIO != null) {
-      socketIO.subscribe("chat_direct", _onReceiveChatMessage);
+      await socketIO.subscribe("chat_direct", _onReceiveChatMessage);
     }
   }
 
-  _unSubscribes() {
+  _unSubscribes() async {
     if (socketIO != null) {
-      socketIO.unSubscribe("chat_direct", _onReceiveChatMessage);
+      await socketIO.unSubscribe("chat_direct", _onReceiveChatMessage);
     }
   }
 
-  _reconnectSocket() {
+  _reconnectSocket() async {
     if (socketIO == null) {
       _connectSocket01();
     } else {
-      socketIO.connect();
+      await socketIO.connect();
     }
   }
 
-  _disconnectSocket() {
+  _disconnectSocket() async {
     if (socketIO != null) {
-      socketIO.disconnect();
+      await socketIO.disconnect();
     }
   }
 
-  _destroySocket() {
+  _destroySocket() async {
     if (socketIO != null) {
-      SocketIOManager().destroySocket(socketIO);
+      await SocketIOManager().destroySocket(socketIO);
     }
   }
 
@@ -136,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (socketIO != null) {
       String jsonData =
           '{"message":{"type":"Text","content": ${(msg != null && msg.isNotEmpty) ? '"${msg}"' : '"Hello SOCKET IO PLUGIN :))"'},"owner":"589f10b9bbcd694aa570988d","avatar":"img/avatar-default.png"},"sender":{"userId":"589f10b9bbcd694aa570988d","first":"Ha","last":"Test 2","location":{"lat":10.792273999999999,"long":106.6430356,"accuracy":38,"regionId":null,"vendor":"gps","verticalAccuracy":null},"name":"Ha Test 2"},"receivers":["587e1147744c6260e2d3a4af"],"conversationId":"589f116612aa254aa4fef79f","name":null,"isAnonymous":null}';
-      socketIO.sendMessage("chat_direct", jsonData, _onReceiveChatMessage);
+      await socketIO.sendMessage("chat_direct", jsonData, _onReceiveChatMessage);
     }
   }
 
