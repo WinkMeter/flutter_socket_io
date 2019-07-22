@@ -1,5 +1,8 @@
 package com.itsclicking.clickapp.fluttersocketio;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import io.flutter.plugin.common.MethodChannel;
 import io.socket.emitter.Emitter;
 
@@ -25,11 +28,14 @@ public class SocketListener implements Emitter.Listener {
     public void call(Object... args) {
         if (args != null && _methodChannel != null && !Utils.isNullOrEmpty(_event)
                 && !Utils.isNullOrEmpty(_callback)) {
-            String data = "";
-            if (args[0] != null) {
-                data = args[0].toString();
-            }
-            _methodChannel.invokeMethod(_socketId + "|" +_event + "|" + _callback, data);
+            final String data = (args[0] != null ? args[0].toString() : "");
+            final Handler _handler = new Handler(Looper.getMainLooper());
+            _handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _methodChannel.invokeMethod(_socketId + "|" + _event + "|" + _callback, data);
+                }
+            });
         }
     }
 }

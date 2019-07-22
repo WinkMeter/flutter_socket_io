@@ -1,3 +1,6 @@
+## 0.5.1
+- Fixed bug: "@UiThread must be executed on the main thread. Current thread: EventThread" on Flutter version > 1.6.x
+
 ## 0.5.0
 - Fixed bug: "@UiThread must be executed on the main thread. Current thread: EventThread" on Flutter version > 1.6.x
 - Upgraded build gradle to 3.4.2.
