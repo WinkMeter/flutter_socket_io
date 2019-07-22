@@ -6,7 +6,7 @@ Flutter Socket IO Plugin, supported Android + iOS (iOS installation guide is com
 
 - 1. Copy the folder `example/ios/Runner/SocketObj` to `${PROJECT_ROOT}/ios/Runner/`
 
-- 2. Replace the `${PROJECT_ROOT}/ios/Runner/AppDelegate.m` with `example/ios/Runner/AppDelegate.m`. 
+- 2. Replace the `example/ios/Runner/AppDelegate.m` line with `${PROJECT_ROOT}/ios/Runner/AppDelegate.m`. 
 (Notice: **You should merge the old one in your project to merge with the new from this plugin if you have some change on that file**)
 
 - 3. Open `${PROJECT_ROOT}/ios/Podfile`, paste this line `pod 'Socket.IO-Client-Swift', '~> 13.3.0'` before the end of `target 'Runner' do` block
