@@ -354,6 +354,7 @@ public class SocketIO {
         mOptions = null;
         _methodChannel = null;
         _subscribes = null;
+        managers.clear();
         Utils.log(TAG, "--- END destroy ---");
     }
 }
