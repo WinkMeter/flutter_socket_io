@@ -9,7 +9,7 @@ Flutter Socket IO Plugin, supported Android + iOS (iOS installation guide is com
 - 2. [If your app's iOs development language is Objective-C] Replace the `example/ios/Runner/AppDelegate.m` line with `${PROJECT_ROOT}/ios/Runner/AppDelegate.m`. 
 (Notice: **You should merge the old one in your project to merge with the new from this plugin if you have some change on that file**)
 
-- 3. [If your app's iOs development language is Swift] Add this line in `${PROJECT_ROOT}/ios/Runner/AppDelegate.swift` AFTER `GeneratedPluginRegistrant.register(with: self)`
+- 3. [If your app's iOs development language is Swift] Add these lines in `${PROJECT_ROOT}/ios/Runner/AppDelegate.swift` AFTER `GeneratedPluginRegistrant.register(with: self)`
 ~~~
 let socketChannel = FlutterMethodChannel(name: "flutter_socket_io", binaryMessenger: controller.binaryMessenger)
     socketChannel.setMethodCallHandler { (call, result) in
