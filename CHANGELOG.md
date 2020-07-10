@@ -1,5 +1,19 @@
+## 0.6.0
+- Fixed bug.
+
+## 0.5.1
+- Fixed bug: "@UiThread must be executed on the main thread. Current thread: EventThread" on Flutter version > 1.6.x
+
+## 0.5.0
+- Fixed bug: "@UiThread must be executed on the main thread. Current thread: EventThread" on Flutter version > 1.6.x
+- Upgraded build gradle to 3.4.2.
+- Changed compileSdkVersion to 28
+
+## 0.4.7
+- Upgraded android build configs.
+
 ## 0.4.6
-- Fixed bugs: get hashCode of Function is always equal 1 when build release iOS
+- Fixed bugs: get hashCode function is always equal 1.
 
 ## 0.4.3
 * Changed: - init with query option

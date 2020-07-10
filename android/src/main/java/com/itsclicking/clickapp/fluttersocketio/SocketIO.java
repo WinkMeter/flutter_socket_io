@@ -1,6 +1,7 @@
 package com.itsclicking.clickapp.fluttersocketio;
 
-import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.google.gson.Gson;
 
@@ -14,7 +15,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.logging.Level;
 
 import io.flutter.plugin.common.MethodChannel;
 import io.socket.client.Ack;
@@ -50,7 +50,7 @@ public class SocketIO {
     }
 
     private void removeChannelAll() {
-        if(_subscribes != null) {
+        if (_subscribes != null) {
             _subscribes.clear();
         }
     }
@@ -60,11 +60,11 @@ public class SocketIO {
     }
 
     private void dumpChannelsCount() {
-        if(!Utils.isNullOrEmpty(_subscribes)) {
+        if (!Utils.isNullOrEmpty(_subscribes)) {
             Utils.log("socketInfo", "SUBSCRIBES SIZES: " + _subscribes.size());
-            for(Map.Entry<String, ConcurrentLinkedQueue<SocketListener>> item : _subscribes.entrySet()) {
+            for (Map.Entry<String, ConcurrentLinkedQueue<SocketListener>> item : _subscribes.entrySet()) {
                 ConcurrentLinkedQueue<SocketListener> listeners = item.getValue();
-                if(listeners == null) {
+                if (listeners == null) {
                     Utils.log("socketInfo", "CHANNEL: " + item.getKey() + " with TOTAL LISTENERS: NULL");
                 } else {
                     Utils.log("socketInfo", "CHANNEL: " + item.getKey() + " with TOTAL LISTENERS: " + listeners.size());
@@ -90,7 +90,7 @@ public class SocketIO {
         mOptions = new IO.Options();
         mOptions.transports = new String[]{WebSocket.NAME};
 
-        if(!Utils.isNullOrEmpty(_query)) {
+        if (!Utils.isNullOrEmpty(_query)) {
             Utils.log(TAG, "query: " + _query);
             mOptions.query = _query;
         }
@@ -116,18 +116,24 @@ public class SocketIO {
         return getSocketUrl();
     }
 
-    private void onSocketCallback(String status, Object... args) {
+    private void onSocketCallback(final String status, Object... args) {
         if (_methodChannel != null && !Utils.isNullOrEmpty(_statusCallback)) {
-            _methodChannel.invokeMethod(getId() + "|" +_statusCallback + "|" + _statusCallback, status);
+            final Handler _handler = new Handler(Looper.getMainLooper());
+            _handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _methodChannel.invokeMethod(getId() + "|" + _statusCallback + "|" + _statusCallback, status);
+                }
+            });
         }
-        if(args != null) {
+        if (args != null) {
             Utils.log(TAG, status + ": " + new Gson().toJson(args));
         }
     }
 
     public void init() {
-        if(_socket != null) {
-            if(_socket.connected()) {
+        if (_socket != null) {
+            if (_socket.connected()) {
                 _socket.disconnect();
             }
             _socket = null;
@@ -188,11 +194,11 @@ public class SocketIO {
     }
 
     public void connect() {
-        if(_socket == null) {
+        if (_socket == null) {
             Utils.log(TAG, "socket: " + getId() + " is not initialized!");
             return;
         }
-        if(_socket.connected()) {
+        if (_socket.connected()) {
             Utils.log(TAG, "socket: " + getId() + " is already connected");
             return;
         }
@@ -202,9 +208,9 @@ public class SocketIO {
 
     public void sendMessage(String event, String message, final String callback) {
 
-        if(Utils.isNullOrEmpty(event) || Utils.isNullOrEmpty(message)) {
+        if (Utils.isNullOrEmpty(event) || Utils.isNullOrEmpty(message)) {
             Utils.log("sendMessage", "Invalid params: event or message is NULL or EMPTY!");
-        } else if(isConnected()) {
+        } else if (isConnected()) {
             Utils.log("sendMessage", "Event: " + event + " - with message: " + message);
             JSONObject jb = null;
             try {
@@ -227,20 +233,20 @@ public class SocketIO {
 
     public void subscribe(String event, final String callback) {
         Utils.log("subscribe", "channel: " + event + " - with callback: " + callback);
-        if(Utils.isNullOrEmpty(event)) {
+        if (Utils.isNullOrEmpty(event)) {
             Utils.log("subscribe", "Invalid params: event is NULL/EMPTY!");
         } else {
-            if(_socket != null) {
+            if (_socket != null) {
                 dumpChannelsCount();
                 ConcurrentLinkedQueue<SocketListener> listeners = _subscribes.get(event);
 
-                if(listeners == null) {
+                if (listeners == null) {
                     listeners = new ConcurrentLinkedQueue<>();
                 }
 
                 SocketListener listener = new SocketListener(_methodChannel, getId(), event, callback);
 
-                if(!Utils.isNullOrEmpty(callback) && !Utils.isExisted(listeners, callback)) {
+                if (!Utils.isNullOrEmpty(callback) && !Utils.isExisted(listeners, callback)) {
                     listeners.add(listener);
                 }
 
@@ -255,7 +261,7 @@ public class SocketIO {
     }
 
     public void subscribes(Map<String, String> subscribes) {
-        if(Utils.isNullOrEmpty(subscribes)) {
+        if (Utils.isNullOrEmpty(subscribes)) {
             Utils.log("subscribes", "Subscribes list is NULL or EMPTY!");
         } else if (_socket != null) {
             Utils.log(TAG, "--- subscribes ---" + new Gson().toJson(subscribes));
@@ -269,21 +275,20 @@ public class SocketIO {
 
     public void unSubscribe(String eventName, final String callback) {
         Utils.log("unSubscribe", "channel: " + eventName + " - with callback: " + callback);
-        if(Utils.isNullOrEmpty(eventName)) {
+        if (Utils.isNullOrEmpty(eventName)) {
             Utils.log("unSubscribe", "Invalid params: event is NULL or EMPTY!");
         } else {
-            if(_socket != null) {
+            if (_socket != null) {
                 dumpChannelsCount();
                 ConcurrentLinkedQueue<SocketListener> listeners = _subscribes.get(eventName);
-                if(listeners == null || Utils.isNullOrEmpty(callback)) {
+                if (listeners == null || Utils.isNullOrEmpty(callback)) {
                     _subscribes.remove(eventName);
                     _socket.off(eventName);
                 } else {
                     SocketListener listener = Utils.findListener(listeners, callback);
-                    if(listener != null) {
-
+                    if (listener != null) {
                         listeners.remove(listener);
-                        if(listeners.size() < 1) {
+                        if (listeners.size() < 1) {
                             _subscribes.remove(eventName);
                             _socket.off(eventName);
                         } else {
@@ -300,7 +305,7 @@ public class SocketIO {
     }
 
     public void unSubscribes(Map<String, String> unSubscribes) {
-        if(Utils.isNullOrEmpty(unSubscribes)) {
+        if (Utils.isNullOrEmpty(unSubscribes)) {
             Utils.log("unSubscribes", "unSubscribes list is NULL or EMPTY!");
         } else if (_socket != null) {
             Utils.log(TAG, "--- unSubscribes ---" + new Gson().toJson(unSubscribes));
@@ -323,7 +328,7 @@ public class SocketIO {
     }
 
     public boolean isConnected() {
-        if(_socket != null) {
+        if (_socket != null) {
             Utils.log(TAG, "socket id: " + getId() + " is connected: " + _socket.connected());
             return _socket.connected();
         } else {
@@ -349,6 +354,7 @@ public class SocketIO {
         mOptions = null;
         _methodChannel = null;
         _subscribes = null;
+        managers.clear();
         Utils.log(TAG, "--- END destroy ---");
     }
 }
