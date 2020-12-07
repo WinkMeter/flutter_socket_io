@@ -11,24 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
+import io.flutter.BuildConfig;
 
 public class Utils {
-
-    public static boolean isExisted(ConcurrentMap<String, ConcurrentLinkedQueue<SocketListener>> subscribes, String channel) {
-        return !Utils.isNullOrEmpty(subscribes) && subscribes.containsKey(channel);
-    }
-
-    public static boolean isExisted(ConcurrentLinkedQueue<SocketListener> listeners, SocketListener listener) {
-        if(!Utils.isNullOrEmpty(listeners)) {
-            for (SocketListener item : listeners) {
-                if(item != null && item.equals(listener)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 
     public static SocketListener findListener(ConcurrentLinkedQueue<SocketListener> listeners, String callback) {
         if(!Utils.isNullOrEmpty(listeners)) {

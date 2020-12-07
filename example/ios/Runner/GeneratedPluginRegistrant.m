@@ -3,7 +3,12 @@
 //
 
 #import "GeneratedPluginRegistrant.h"
+
+#if __has_include(<flutter_socket_io/FlutterSocketIoPlugin.h>)
 #import <flutter_socket_io/FlutterSocketIoPlugin.h>
+#else
+@import flutter_socket_io;
+#endif
 
 @implementation GeneratedPluginRegistrant
 

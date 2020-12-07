@@ -8,10 +8,10 @@ import io.socket.emitter.Emitter;
 
 public class SocketListener implements Emitter.Listener {
 
-    private MethodChannel _methodChannel;
-    private String _socketId;
-    private String _event;
-    private String _callback;
+    private final MethodChannel _methodChannel;
+    private final String _socketId;
+    private final String _event;
+    private final String _callback;
 
     public SocketListener(MethodChannel methodChannel, String socketId, String event, String callback) {
         _methodChannel = methodChannel;

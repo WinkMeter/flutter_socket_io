@@ -30,14 +30,14 @@ public class SocketIO {
     private static final String TAG = "SocketIO";
 
     private MethodChannel _methodChannel;
-    private String _domain;
+    private final String _domain;
     private String _namespace;
     private String _statusCallback;
-    private String _query;
+    private final String _query;
     private Socket _socket;
     private IO.Options mOptions;
     private ConcurrentMap<String, ConcurrentLinkedQueue<SocketListener>> _subscribes;
-    private static final ConcurrentHashMap<String, Manager> managers = new ConcurrentHashMap<String, Manager>();
+    private static final ConcurrentHashMap<String, Manager> managers = new ConcurrentHashMap<>();
 
     public SocketIO(MethodChannel methodChannel, String domain,
                     String namespace, String query, String statusCallback) {
@@ -97,8 +97,8 @@ public class SocketIO {
 
         String id = Url.extractId(parsed);
         boolean newConnection = !managers.containsKey(id);
-        Manager io;
 
+        Manager io;
         if (newConnection) {
             io = new Manager(source, mOptions);
             managers.putIfAbsent(id, io);
@@ -108,7 +108,7 @@ public class SocketIO {
             }
             io = managers.get(id);
         }
-
+        if(io == null) return null;
         return io.socket(_namespace, mOptions);
     }
 
@@ -140,6 +140,11 @@ public class SocketIO {
         }
 
         _socket = getSocket();
+
+        if(_socket == null) {
+            Utils.log(TAG, "init SOCKET NULL");
+            return;
+        }
 
         Utils.log(TAG, "connecting..." + _socket.id());
 

@@ -11,7 +11,6 @@ public class SocketIOManager implements ISocketIOManager {
     private static ISocketIOManager mInstance;
     private Map<String, SocketIO> mSockets;
 
-
     public synchronized static ISocketIOManager getInstance() {
         if (mInstance == null) {
             mInstance = new SocketIOManager();
@@ -54,9 +53,9 @@ public class SocketIOManager implements ISocketIOManager {
         }
     }
 
-    private boolean isConnected(SocketIO socketIO) {
+   /* private boolean isConnected(SocketIO socketIO) {
         return socketIO != null && socketIO.isConnected();
-    }
+    }*/
 
     private String getSocketId(String domain, String namespace) {
         if(!Utils.isNullOrEmpty(domain)) {
