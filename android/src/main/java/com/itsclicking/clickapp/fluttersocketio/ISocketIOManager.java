@@ -14,4 +14,7 @@ public interface ISocketIOManager {
     void disconnect(String domain, String namespace);
     void destroySocket(String domain, String namespace);
     void destroyAllSockets();
+
+    String getSocketId(String domain, String namespace);
+    SocketIO getSocket(String socketId);
 }
